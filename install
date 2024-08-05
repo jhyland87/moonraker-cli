@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+# Verify installed components  (* = may not be needed):
+# 	- bash5 - duh
+# 	- brew 	- Installer
+# 	- curl	- To curl stuff
+# 	- jq 		- Json parser
+# 	- *jc 	- For converting some common command output to json
+# 	- jp 		- For graphing
+# 	- *imgcat - For webcam view stuff
+# 	- tput  - May already be installed by default
+
+printf "Checking for %s... " "curl"
+type -fp curl && echo "OK" || echo "Not found"
+

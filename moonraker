@@ -1,0 +1,102 @@
+#!/usr/bin/env bash
+
+
+set -o errtrace
+set -o functrace
+
+declare -rgx CLI_PWD=$(dirname $(realpath $0))
+declare -rgx CLI_NAME=$(basename $0)
+
+
+source ${CLI_PWD}/settings
+source ${CLI_PWD}/includes/colors.sh
+source ${CLI_PWD}/includes/logging.sh
+#source ${CLI_PWD}/includes/prompts.sh
+
+# Global r/w integer settings
+declare -igx LOG_LEVEL=${LOG_LEVEL:=1} MOONRAKER_TIMEOUT
+
+# Simple constants - readonly integer values
+declare -irx CONST_LOGLVL_NONE=0 CONST_LOGLVL_ERROR=1 CONST_LOGLVL_WARN=2 \
+						CONST_LOGLVL_INFO=3 CONST_LOGLVL_DEBUG=4
+
+# Readonly string values
+declare -rx 	MOONRAKER_HOST MOONRAKER_PORT MOONRAKER_PROTO \
+						LOG_FORMAT=${LOG_FORMAT:-'%21s| %8s: %s\n'}
+
+
+[[ ! ${MOONRAKER_HOST} ]] && _error "No MOONRAKER_HOST defined - please define this in the settings file" 1
+
+declare -rgx API_HOST="${MOONRAKER_PROTO:-http}://${MOONRAKER_HOST}:${MOONRAKER_PORT:-7125}"
+_debug "API_HOST set to ${API_HOST}"
+
+declare -gr CURL_BIN=$(type -p curl; exit $?)
+[[ $? != 0 ]] && _error "No curl binary found - Install with brew" 1
+_debug "Found curl at ${CURL_BIN}"
+
+declare -gr JQ_BIN=$(type -p jq; exit $?)
+[[ $? != 0 ]] && _error "No jq binary found" 1
+_debug "Found jq at ${JQ_BIN} - Install with brew"
+
+declare -gr GPRINTF_BIN=$(type -p gprintf; exit $?)
+[[ $? != 0 ]] && _error "No gprintf binary found - Install with brew " 1
+_debug "Found gprintf at ${GPRINTF_BIN}"
+
+
+
+
+
+_get() {
+	[[ ! $2 ]] && 
+	curl ${API_HOST} \
+	  --request GET \
+	  --request-target "${1?-No request target provided}" \
+	  --connect-timeout ${MOONRAKER_TIMEOUT:-5} \
+	  --silent &&
+	  return $?
+
+	curl ${API_HOST} \
+	  --request GET \
+	  --request-target "${1?-No request target provided}" \
+	  --connect-timeout ${MOONRAKER_TIMEOUT:-5} \
+	  --silent \
+	  --data "${2}" &&
+	  return $?
+
+	  #'webhooks&virtual_sdcard&print_stats'
+}
+
+_post() {
+	[[ ! $2 ]] && 
+	curl ${API_HOST} \
+	  --request-target "${1?-No request target provided}" \
+	  --request POST \
+	  --silent &&
+	  return $?
+
+	curl ${API_HOST} \
+	  --request-target "${1?-No request target provided}" \
+	  --request POST \
+	  --silent \
+	  --data "${2}" &&
+	  return $?
+}
+
+
+export -f _error _warn _info _debug  _ts
+export -f _get _post
+
+#declare -xf error _warn _info _debug  _ts _get _post
+
+_debug "INPUT is: $*"
+
+execcmd="${1?-No command provided}"
+shift
+
+
+
+[[ -f ./commands/${execcmd}.sh ]] || _error "No subcommand found for ${execcmd}" 1
+
+#export -p 
+./commands/${execcmd}.sh $*
+
