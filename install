@@ -9,7 +9,13 @@
 # 	- jp 		- For graphing
 # 	- *imgcat - For webcam view stuff
 # 	- tput  - May already be installed by default
+# 	- nc 		- For checking if specific ports are online
+# 	- gdate - A better alternative to date cmd
+# 	- terminal-notifier - Notifications for job completions, errors, etc
 
 printf "Checking for %s... " "curl"
 type -fp curl && echo "OK" || echo "Not found"
+
+
+
 

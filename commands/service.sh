@@ -19,8 +19,12 @@ TEMP=$(getopt -o hl: --long help,list: \
 declare -a show_objects
 DEBUG=false
 
-function printerstate {
-	curl ${API_HOST} \
+function printer_state {
+	_get /printer/objects/query 'webhooks&virtual_sdcard&print_stats' |
+		jq '.result.status | {message: last(.print_stats.message, .webhooks.state_message | select(. != "")), webhooks: .webhooks.state, printer: .print_stats.state, filename: .print_stats.filename, progress: .virtual_sdcard.progress} | with_entries(if .value == null or .value == "" then empty else . end)'
+	return
+
+	curl http://192.168.0.96:7125\
 	  --request-target /printer/objects/query \
 	  --request GET \
 	  --silent \

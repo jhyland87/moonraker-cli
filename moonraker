@@ -1,28 +1,38 @@
 #!/usr/bin/env bash
 
 
-set -o errtrace
-set -o functrace
+tabs -2
 
-declare -rgx CLI_PWD=$(dirname $(realpath $0))
+#set -o errtrace
+#set -o functrace
+
+declare -rgx CLI_DIR=$(dirname $(realpath $0))
 declare -rgx CLI_NAME=$(basename $0)
+declare -rgx CLI_PID=$$
 
+# Simple constants - readonly integer values
+declare -irx CONST_LOGLVL_NONE=0 CONST_LOGLVL_ERROR=1 CONST_LOGLVL_WARN=2 \
+						 CONST_LOGLVL_INFO=3 CONST_LOGLVL_DEBUG=4
 
-source ${CLI_PWD}/settings
-source ${CLI_PWD}/includes/colors.sh
-source ${CLI_PWD}/includes/logging.sh
-#source ${CLI_PWD}/includes/prompts.sh
+source ${CLI_DIR}/includes/colors.sh
+source ${CLI_DIR}/includes/logging.sh
+
+test -f ${CLI_DIR}/settings || _fatal "No settings file found"
+
+source ${CLI_DIR}/settings
+source ${CLI_DIR}/includes/connect.sh
+#source ${CLI_DIR}/includes/prompts.sh
+
+check_moonraker_port || _fatal "Unable to connect to moonraker at ${MOONRAKER_HOST}:${MOONRAKER_PORT}"
 
 # Global r/w integer settings
 declare -igx LOG_LEVEL=${LOG_LEVEL:=1} MOONRAKER_TIMEOUT
 
-# Simple constants - readonly integer values
-declare -irx CONST_LOGLVL_NONE=0 CONST_LOGLVL_ERROR=1 CONST_LOGLVL_WARN=2 \
-						CONST_LOGLVL_INFO=3 CONST_LOGLVL_DEBUG=4
+
 
 # Readonly string values
 declare -rx 	MOONRAKER_HOST MOONRAKER_PORT MOONRAKER_PROTO \
-						LOG_FORMAT=${LOG_FORMAT:-'%21s| %8s: %s\n'}
+							LOG_FORMAT=${LOG_FORMAT:-'%21s| %8s: %s\n'}
 
 
 [[ ! ${MOONRAKER_HOST} ]] && _error "No MOONRAKER_HOST defined - please define this in the settings file" 1
@@ -43,43 +53,41 @@ declare -gr GPRINTF_BIN=$(type -p gprintf; exit $?)
 _debug "Found gprintf at ${GPRINTF_BIN}"
 
 
-
+declare -gr NO_COLOR="Y"
 
 
 _get() {
-	[[ ! $2 ]] && 
-	curl ${API_HOST} \
-	  --request GET \
-	  --request-target "${1?-No request target provided}" \
-	  --connect-timeout ${MOONRAKER_TIMEOUT:-5} \
-	  --silent &&
-	  return $?
-
-	curl ${API_HOST} \
-	  --request GET \
-	  --request-target "${1?-No request target provided}" \
-	  --connect-timeout ${MOONRAKER_TIMEOUT:-5} \
-	  --silent \
-	  --data "${2}" &&
-	  return $?
+	if [[ ! $2 ]]; then
+		curl ${API_HOST} \
+		  --request GET \
+		  --request-target "${1?-No request target provided}" \
+		  --connect-timeout ${MOONRAKER_TIMEOUT:-5} \
+		  --silent 
+	else
+		curl ${API_HOST} \
+		  --request GET \
+		  --request-target "${1?-No request target provided}" \
+		  --connect-timeout ${MOONRAKER_TIMEOUT:-5} \
+		  --silent \
+		  --data "${2}" 
+	 fi
 
 	  #'webhooks&virtual_sdcard&print_stats'
 }
 
 _post() {
-	[[ ! $2 ]] && 
-	curl ${API_HOST} \
-	  --request-target "${1?-No request target provided}" \
-	  --request POST \
-	  --silent &&
-	  return $?
-
-	curl ${API_HOST} \
-	  --request-target "${1?-No request target provided}" \
-	  --request POST \
-	  --silent \
-	  --data "${2}" &&
-	  return $?
+	if [[ ! $2 ]]; then
+		curl ${API_HOST} \
+		  --request POST \
+		  --request-target "${1?-No request target provided}" \
+		  --silent
+	else
+		curl ${API_HOST} \
+		  --request POST \
+		  --request-target "${1?-No request target provided}" \
+		  --silent \
+		  --data "${2}"
+	fi
 }
 
 
@@ -90,13 +98,13 @@ export -f _get _post
 
 _debug "INPUT is: $*"
 
-execcmd="${1?-No command provided}"
+execcmd="${1?No command provided}"
 shift
 
 
 
-[[ -f ./commands/${execcmd}.sh ]] || _error "No subcommand found for ${execcmd}" 1
+[[ -f "${CLI_DIR}/commands/${execcmd}.sh" ]] || _error "No subcommand found for ${execcmd}" 1
 
 #export -p 
-./commands/${execcmd}.sh $*
+${CLI_DIR}/commands/${execcmd}.sh $*
 

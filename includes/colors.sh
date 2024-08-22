@@ -22,6 +22,7 @@
 _none_="\e[0m"
 
 _red_="\e[31m"
+_redb_="\e[31;1m"
 _green_="\e[32m"
 _yellow_="\e[33m"
 _blue_="\e[34m"
@@ -37,8 +38,8 @@ _nocolor_="\e[39m"
 
 _bold_="\e[1m"
 _nobold_="\e[22m"
-_bold_="\e[1m"
-_nobold_="\e[22m"
+_bld_="\e[1m"
+_bldx_="\e[22m"
 
 _dim_="\e[2m"
 _nodim_="\e[22m"
@@ -46,9 +47,15 @@ _xdim_="\e[22m"
 
 _italic_="\e[3m"
 _noitalic_="\e[23m"
+_ital_="\e[3m"
+_italx_="\e[23m"
 
 _underline_="\e[4m"
 _nounderline_="\e[24m"
+_underline_="\e[4m"
+_nounderline_="\e[24m"
+_ul_="\e[4m"
+_ulx_="\e[24m"
 
 _overline_="\e[53m"
 _nooverline_="\e[55m"

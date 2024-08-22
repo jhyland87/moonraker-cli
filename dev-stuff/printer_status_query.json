@@ -1,0 +1,7 @@
+{
+  "message": "Printer is ready",
+  "webhooks": "ready",
+  "printer": "standby",
+  "progress": 0.0,
+  "percent": "0%"
+}

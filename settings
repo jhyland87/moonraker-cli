@@ -1,24 +1,41 @@
 
-
-
 # IP or hostname for the device running moonraker
 export MOONRAKER_HOST="192.168.0.96"
 
+# Usable ports
+export MJPG_STREAMER_PORT=8080
+export SSH_PORT=22
+export HTTP_PORT=80
+export FLUIDD_PORT=4408
+export MAINSAIL_PORT=4409
+
 # Port that the host is running moonraker on (usually 7125)
 export MOONRAKER_PORT=7125
+
+#export MOONRAKER_PORT=7625
 
 # Is moonraker on http or https
 export MOONRAKER_PROTO='http'
 
 export MOONRAKER_TIMEOUT=5
 
+# Timeout for other things (eg: checking port availability)
+export GENERAL_TIMEOUT=5
+
+export TEST_FLUIDD=true
+export TEST_MAINSAIL=false
+#export KLIPPER_UI="mainsail"
+
+
 # This format is similar to the ISO format: 2024-08-03T12-05-58Z
-export TIMESTAMP_FORMAT="%Y-%m-%dT%H-%M-%SZ"
+# (output is given to gdate)
+export TIMESTAMP_FORMAT="%FT%R:%S.%3NZ"
 
 # <timestamp> <logtype> <data>
 #export LOG_FORMAT="%21s| %8s: %s\n"
 
-export LOG_FORMAT="%b%(+%Y-%m-%dT%H-%M-%SZ)T%b| %b%8s%b: %b%s%b\n"
+#export LOG_FORMAT="%b%(+%Y-%m-%dT%H-%M-%SZ)T%b| %b%8s%b: %b%s%b\n"
+export LOG_FORMAT="%b%-25s%b  %b%8s%b: %b%s%b\n"
 
 # Output log level
 # Acceptable values: 
@@ -31,4 +48,7 @@ export LOG_LEVEL=1
 
 # Determines if the console should be colored
 export CLICOLOR=true
+
+# This will determine the seconds between the graphs/charts, are updated
+export GRAPH_UPDATE_INTERVAL=1
 
