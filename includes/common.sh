@@ -177,11 +177,12 @@ _hr() {
 	#echo "hrWidth: ${hrWidth}" 1>&2
 	#echo "repeatCharCount: ${repeatCharCount}" 1>&2
 
+	echo -en "${_hr_}"
 	for i in $(seq 1 ${repeatCharCount}) ; do 
 		printf "${char}" 1>&2
 	done
-
-	echo;
+	echo -e "${_none_}"
+	#echo;
 }
 
 _decolor(){
@@ -196,4 +197,42 @@ _decolor(){
 	fi
 
 	return 1
+}
+
+screen_restore(){
+	echo "Restoring screen..." 
+	sleep 1
+	stty echoctl
+	stty echo
+	tput cnorm
+	tput clear
+
+	# rmcup - Remove Memory CUrsor Positon
+	tput rmcup
+	exit
+}
+
+# temp_terminal - Creates a new temporary terminal (clears the screen), 
+# disables the ctrl character outputs and user input echo and creates a 
+# trap for ctrl+x or ctrl+c to restore the status of the temporary 
+# terminal
+#
+#	Example: The below will put the while loop output in a new temporary
+# 				 terminal, but will kill the loop and restore the previous
+# 				 terminal status when SIGINT is triggered.
+# 	temp_terminal
+# 	while true; do moonraker print status; sleep 1; done
+temp_terminal(){
+	trap 'screen_restore' SIGINT
+	#trap 'screen_restore' SIGSTOP
+	#trap 'screen_restore' SIGQUIT
+	#trap 'screen_restore' SIGKILL
+	#trap 'screen_restore' SIGTRAP
+	#trap 'screen_restore' SIGTERM
+
+	# smcup - Save Memory CUrsor Positon
+	tput smcup
+	stty -echoctl
+	stty -echo
+	tput civis
 }

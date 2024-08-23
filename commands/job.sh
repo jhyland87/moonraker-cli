@@ -127,10 +127,17 @@ job_start(){
 }
 
 job_watch(){
+	#trap 'screen_restore' SIGINT
 	# DESCRIPTION: Watch job status data
 	# SYNTAX: moonraker job watch <metrics>
 	# EXAMPLE: moonraker job watch progress temperatures cpu logs
-	local watch_data="${@}"
+	#local watch_data="${@}"
+
+	echo -e "Preparing to watch ${_command_}moonraker job $@${_none_}"
+	sleep 0.5
+	return
+	temp_terminal
+
 	echo "Watching ${watch_data}..."
 	sleep 2
 
@@ -144,7 +151,7 @@ job_watch(){
 		#show_system_memory_usage
 		sleep ${GRAPH_UPDATE_INTERVAL:-3}
 	done
-	
+
 }
 
 get_proc_stats_data(){

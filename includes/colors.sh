@@ -33,8 +33,11 @@ _orange_="\e[38;5;214m"
 _olivedrab_="\e[38;5;64m"
 _olive_="\e[38;5;58m"
 _dirtyyellow_="\e[38;5;142m"
-
 _nocolor_="\e[39m"
+
+
+_command_="\e[38;5;117;3m"
+_hr_="\e[38;5;138;1m"
 
 _bold_="\e[1m"
 _nobold_="\e[22m"

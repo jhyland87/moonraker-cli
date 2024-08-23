@@ -130,7 +130,7 @@ printer_test(){
 }
 
 printer_info(){
-	http://192.168.0.96:7125/printer/info
+	echo 'http://192.168.0.96:7125/printer/info'
 }
 _debug "Arguments: $# - $*"
 

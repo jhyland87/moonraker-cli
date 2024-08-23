@@ -26,17 +26,31 @@ watch_help() {
 
 _debug "Arguments: $# - $*"
 
-subcmd="${1:-help}"
-subcmd_fn="watch_${subcmd}"
+#subcmd="${1:-help}"
+#subcmd_fn="watch_${subcmd}"
 
-_debug "Subcommand: ${subcmd}"
-_debug "Function: ${subcmd_fn}"
-shift
+#_debug "Subcommand: ${subcmd}"
+#_debug "Function: ${subcmd_fn}"
 
-cmd_type=$(type -t "${subcmd_fn}")
+echo -e "Executing ${_command_}moonraker $@${_none_}"
+sleep 1
 
-if [[ ${cmd_type} == 'function' ]]; then
-	$subcmd_fn $*
-else
-	_error "The command ${subcmd} is not a valid function" && exit 1
-fi
+temp_terminal
+while true; do
+	tput cup 0 0
+	moonraker $@
+	sleep 1;
+done
+
+#original_args=($@)
+#shift
+
+#echo "Args: ${original_args[@]}"
+
+#cmd_type=$(type -t "${subcmd_fn}")
+
+#if [[ ${cmd_type} == 'function' ]]; then
+#	$subcmd_fn $*
+#else
+#	_error "The command ${subcmd} is not a valid function" && exit 1
+#fi
