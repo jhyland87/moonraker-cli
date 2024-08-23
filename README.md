@@ -15,5 +15,3 @@ moonraker-cli
     ├── service.sh
     └── status.sh
 ``
-
-test

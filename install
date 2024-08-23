@@ -8,14 +8,64 @@
 # 	- *jc 	- For converting some common command output to json
 # 	- jp 		- For graphing
 # 	- *imgcat - For webcam view stuff
-# 	- tput  - May already be installed by default
-# 	- nc 		- For checking if specific ports are online
+# 	- netcat - For checking if specific ports are online
 # 	- gdate - A better alternative to date cmd
-# 	- terminal-notifier - Notifications for job completions, errors, etc
+# 	- noti - Notifications for job completions, errors, etc
+
+_error(){
+    printf "ERROR: %s\n" "$?" 1>&2
+}
 
 printf "Checking for %s... " "curl"
-type -fp curl && echo "OK" || echo "Not found"
+type -fp curl 
+
+if [[ $? != 0 ]]; then
+    echo "Not found"
+    exit 1
+fi
 
 
+printf "Checking for %s... " "brew"
+type -fp brew
+
+if [[ $? != 0 ]]; then
+    echo "Not found"
+
+     # /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    read -p "Install brew now? " -n 1 -r
+    echo    # (optional) move to a new line
+    if [[ $REPLY =~ ^[Yy]$ ]]
+    then
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+        [[ $? -ne 0 ]] && _error "Failed to install brew" && exit 1
+    
+    else
+        echo "Not installing brew - exiting"
+        exit 1
+    fi
+fi
+
+brew_bin=$(type -fp brew)
+
+minimum_packages="jq jp netcat"
+extra_packages="noti imgcat"
+
+install_minimum(){
+    echo "Installing minimum packages: ${minimum_packages}"
+    brew install ${minimum_packages}
+
+    [[ $? != 0 ]] && _error "Error installing minimum packages" && exit 1
+}
+
+install_extra(){
+    echo "Installing extra packages: ${extra_packages}"
+    brew install ${extra_packages}
+
+    [[ $? != 0 ]] && _error "Error installing extra packages" && exit 1
+}
 
 
+install_minimum && install_extra
+
+sudo ln -vs $(realpath ./moonraker) /usr/local/bin/moonraker
