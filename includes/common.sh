@@ -236,3 +236,15 @@ temp_terminal(){
 	stty -echo
 	tput civis
 }
+
+_h1(){
+	echo -e "${_h1_}$@${_none_}\n"
+}
+
+_h2(){
+	echo -e "${_h2_}$@${_none_}\n"
+}
+
+_h3(){
+	echo -e "${_h3_}$@${_none_}\n"
+}

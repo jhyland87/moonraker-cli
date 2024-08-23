@@ -36,7 +36,15 @@ echo -e "Executing ${_command_}moonraker $@${_none_}"
 sleep 1
 
 temp_terminal
+term_width=`tput cols`
+term_lines=`tput lines`
+
 while true; do
+	if [[ `tput cols` -ne ${term_width} || `tput lines` -ne ${term_lines} ]]; then
+		term_width=`tput cols`
+		term_lines=`tput lines`
+		tput clear
+	fi
 	tput cup 0 0
 	moonraker $@
 	sleep 1;
