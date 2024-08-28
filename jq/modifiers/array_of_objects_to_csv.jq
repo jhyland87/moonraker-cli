@@ -25,7 +25,7 @@
 #					--from-file ./jq/modifiers/array_of_objects_to_csv.jq
 #
 # OUTPUT:
-#    "name","path","size","size_human","modified","date"
+#    "NAME","PATH","SIZE","SIZE_HUMAN","MODIFIED","DATE"
 #    "file_one.gcode","file_one.gcode",9439635,"9.44 MB",1724362976.4302409,"2024-08-22T21:42:56Z"
 #    "file_two.gcode","project_folder/file_two.gcode",1218625,"1.22 MB",1724361836.9251854,"2024-08-22T21:23:56Z"
 #    "file_three.gcode","project_folder/file_three.gcode",1355597,"1.36 MB",1724323074.738102,"2024-08-22T10:37:54Z"
@@ -44,27 +44,27 @@
 #				column -ts $'\t'
 #
 # OUTPUT:
-#    name              path                             size     size_human  modified            date
+#    NAME              PATH                             SIZE     SIZE_HUMAN  MODIFIED            DATE
 #    file_one.gcode    file_one.gcode                   9439635  9.44 MB     1724362976.4302409  2024-08-22T21:42:56Z
 #    file_two.gcode    project_folder/file_two.gcode    1218625  1.22 MB     1724361836.9251854  2024-08-22T21:23:56Z
 #    file_three.gcode  project_folder/file_three.gcode  1355597  1.36 MB     1724323074.738102   2024-08-22T10:37:54Z
 #    
 #    
 
+include "utils"; 
 (if type!="array" then error("root needs to be an array") end)
 | (if (.[0] | type!="object") then error("first array entry is not an object") end)
 | (.[0] | to_entries | map(.key)) as $column_names 
 | (if length == 0 then halt end)
 | (
-	$column_names
+	$column_names | map(ascii_upcase)
 ),
 (
 	.[] 
 	| select(type == "object") 
 	| to_entries 
-	| map(select(.key == ("name","path","size","date"))) 
+	| [.[] | select(.key| in_array($column_names[]) )]
 	| map(.value)
-	#.[] | select(type == "object") | to_entries | [ .[] | select(.key == ($column_names))]
 ) 
 | if ($ARGS.named | has("output")) and $ARGS.named["output"] == "tsv" then @tsv else @csv end
 

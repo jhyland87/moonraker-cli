@@ -15,3 +15,13 @@ def bytes:
       _bytes(v/1000; u[1:])
     end;
   _bytes(.; ":k:M:G:T:P:E:Z:Y" / ":");
+
+def in_array(s): 
+  . as $in 
+  | first(
+      if (s == $in) then 
+        true 
+      else 
+        empty 
+      end
+    ) // false;

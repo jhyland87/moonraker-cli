@@ -63,13 +63,18 @@ file.list(){
 
 	#_get /server/files/list "root=${root_folder}" | jq -L '../jq/' 'include "utils"; [.result[] | {path: .path, modified_ts:.modified, modified_date: (.modified|todate), size: (.size|bytes), permissions: .permissions}] | sort_by(.modified_ts) | reverse'
 
-	_get /server/files/list 'root=gcodes' | jq \
-		--monochrome-output \
-		--raw-output \
-		-L "${cwd}/../jq" \
-		--from-file "${cwd}/../jq/filters/file.print__recently_modified.jq"  \
-		--arg limit 10 \
-		--arg sort_by modified | jq '.[].name'
+	_get /server/files/list 'root=gcodes' | 
+		jq \
+			--monochrome-output \
+			--raw-output \
+			-L "${__module_dir}/../jq" \
+			--from-file "${__module_dir}/../jq/filters/file.print__recently_modified.jq"  \
+			--arg limit 10 |
+		jq --monochrome-output --raw-output \
+			-L "${__module_dir}/../jq" \
+			--from-file "${__module_dir}/../jq/modifiers/array_of_objects_to_csv.jq" \
+			--arg output tsv | 
+		column -ts $'\t'
 }
 
 file.print(){
