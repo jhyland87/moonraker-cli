@@ -5,8 +5,14 @@ source ${CLI_DIR}/includes/common.sh
 source ${CLI_DIR}/includes/colors.sh
 source ${CLI_DIR}/includes/logging.sh
 source ${CLI_DIR}/includes/prompts.sh
+source ${CLI_DIR}/includes/connect.sh
 
-#export -p
+__module_path=$(realpath "${BASH_SOURCE[0]}") # /absolute/path/to/module/example.sh
+__module_dir=$(dirname "${__module_path}") # /absolute/path/to/module
+__module_file=$(basename ${__module_path}) # example.sh
+__module_name=${__module_file%%.sh} # example
+# echo ${__module_name^^} # EXAMPLE
+
 
 
 #[[ -z ${API_HOST} ]] && _error "No ${API_HOST} found" 1
@@ -21,20 +27,20 @@ source ${CLI_DIR}/includes/prompts.sh
 declare -a show_objects
 DEBUG=false
 
-macro_description(){
+macro.description(){
 	# DESCRIPTION: Description of this command
 	confirm_action
 	echo "This command is for managing jobs" 1>&2
 }
 
-macro_help() {
+macro.help() {
 	echo "Help..." 1>&2
 
-	declare -pf  | grep -E -A4  '^macro_' # | sed -E 's/^declare .* macro_//g'
+	declare -pf  | grep -E -A4  '^macro.' # | sed -E 's/^declare .* macro.//g'
 }
 
 
-macro_help(){
+macro.help(){
 	echo -e "${_bld_}${_dirtyyellow_}MACRO COMMANDS${_none_}"
 	echo
 	echo -e "  ${_bld_}${_ital_}${_blue_}List macros${_none_}"
@@ -51,7 +57,9 @@ macro_help(){
 }
 
 
-macro_list(){
+macro.list(){
+	require_moonraker_connect
+
 	#local object_list=$(_get /printer/objects/list)
 
 	#curl  --silent http://192.168.0.96:7125/printer/objects/list | jq -c '.result.objects[] | select(contains("gcode_macro")) | sub("gcode_macro "; "")'
@@ -87,15 +95,6 @@ macro_list(){
 }
 
 
-_debug "Arguments: $# - $*"
-
-subcmd="$1"
-
-_debug "Subcommand: $subcmd"
-shift
-
-
-
 # curl http://192.168.0.96:7125 --request GET  --request-target  /printer/objects/query --data 'webhooks&virtual_sdcard&print_stats' --silent 
 # curl http://192.168.0.96:7125 --request GET  --request-target  /printer/objects/query --data 'webhooks=state,state_message&print_stats=state' --silent  | jq '.result'
 
@@ -105,12 +104,22 @@ is_printing() {
 	test $current_state == 'printing'
 }
 
-cmd_type=$(type -t "macro_${subcmd}")
+
+_debug "Arguments: $# - $*"
+
+subcmd="${1:-list}"
+subcmd_fn="${__module_name}.${subcmd}"
+
+_debug "Subcommand: $subcmd"
+shift
+
+
+cmd_type=$(type -t "${subcmd_fn}")
 
 
 
 if [[ ${cmd_type} == 'function' ]]; then
-	macro_$subcmd $*
+	eval ${subcmd_fn} ${@@Q}
 else
 	_error "The command ${subcmd} is not a valid function" 1
 fi

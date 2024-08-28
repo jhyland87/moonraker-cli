@@ -36,13 +36,6 @@ _dirtyyellow_="\e[38;5;142m"
 _nocolor_="\e[39m"
 
 
-_command_="\e[38;5;117;3m"
-_h1_="\e[38;5;11;1;4m"
-_h2_="\e[38;5;87;1;4m"
-_h3_="\e[38;5;75;4m"
-
-_hr_="\e[38;5;138;1m"
-
 _bold_="\e[1m"
 _nobold_="\e[22m"
 _bld_="\e[1m"
@@ -203,10 +196,34 @@ function decolor {
 }
 
 
-declare -xg  	_none _red _green _yellow _blue _pink _cyan _grey _orange _olivedrab _olive \
-							_dirtyyellow _nocolor _bold _nobold _bold _nobold _dim _nodim _xdim _italic \
-							_noitalic _underline _nounderline _overline _nooverline _inverse _xinverse \
-							_hide _xhide _strike _xstrike _xcolr _grn _yel _blu _pnk _cyn _gry _ora _odg \
-							_olv _dyel _bld _xbld _ital _xital _undl _xundl _strk _xstrk  \
-							_boldn _boldred _boldyellow _dimn _italn _uscoren _hln _redn _greenn _yellown \
-							_whiten _greyn _bold _red _green _yellow _white _grey showcolors _colors decolor
+# Use specific styles
+_h1_="\e[38;5;11;1;4m"
+_h2_="\e[38;5;87;1;4m"
+_h3_="\e[38;5;75;4m"
+_eg_="\e[0;38;5;242;3m"
+
+# The $ used in example text
+_prompt_="\e[38;5;239;3m"
+
+_helphead_="\e[38;5;142;1m"
+# Style for the command example titles
+_egdesc_="\e[34;1;3m"
+# Style for the command examples in the help output
+#_egcmd_="\e[38;5;117;3m"
+_egcmd_="\e[1m"
+
+# And the output from that example
+_egres_="\e[38;5;255;2;3m"
+
+_command_="\e[38;5;117;3m"
+#_hr_="\e[38;5;138;1m"
+_hr_="\e[2m"
+
+# 
+# declare -xg  	_none _red _green _yellow _blue _pink _cyan _grey _orange _olivedrab _olive \
+# 							_dirtyyellow _nocolor _bold _nobold _bold _nobold _dim _nodim _xdim _italic \
+# 							_noitalic _underline _nounderline _overline _nooverline _inverse _xinverse \
+# 							_hide _xhide _strike _xstrike _xcolr _grn _yel _blu _pnk _cyn _gry _ora _odg \
+# 							_olv _dyel _bld _xbld _ital _xital _undl _xundl _strk _xstrk  \
+# 							_boldn _boldred _boldyellow _dimn _italn _uscoren _hln _redn _greenn _yellown \
+# 							_whiten _greyn _bold _red _green _yellow _white _grey showcolors _colors decolor

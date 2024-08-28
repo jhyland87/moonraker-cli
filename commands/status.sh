@@ -4,25 +4,38 @@ source ${CLI_DIR}/includes/common.sh
 source ${CLI_DIR}/includes/colors.sh
 source ${CLI_DIR}/includes/logging.sh
 source ${CLI_DIR}/includes/prompts.sh
+source ${CLI_DIR}/includes/connect.sh
 
 # http://192.168.0.96:7125/printer/objects/list
-declare -a show_objects
-DEBUG=false
+__module_path=$(realpath "${BASH_SOURCE[0]}") # /absolute/path/to/module/example.sh
+__module_dir=$(dirname "${__module_path}") # /absolute/path/to/module
+__module_file=$(basename ${__module_path}) # example.sh
+__module_name=${__module_file%%.sh} # example
+# echo ${__module_name^^} # EXAMPLE
 
-status_description(){
+
+status.description(){
 	# DESCRIPTION: Description of this command
 	echo "This command is for watching print status" 1>&2
 }
 
-status_help() {
-	echo -e "${_bld_}${_dirtyyellow_}PRINTER COMMANDS${_none_}"
+status.help() {
+	echo -e "${_bld_}${_dirtyyellow_}${__module_name^^} COMMANDS${_none_}"
 	echo
-	echo -e "  ${_bld_}${_ital_}${_blue_}Test availability${_none_}"
-	echo -e "     moonraker printer test"
+	echo -e "  ${_bld_}${_ital_}${_blue_}Show all temps${_none_}"
+	echo -e "     moonraker status temps"
+	echo
+	echo -e "  ${_bld_}${_ital_}${_blue_}Show fan status${_none_}"
+	echo -e "     moonraker status fans"
+	echo
+	echo -e "  ${_bld_}${_ital_}${_blue_}Show extruder temp${_none_}"
+	echo -e "     moonraker status extruder"
 	echo
 }
 
-status_fans(){
+status.fans(){
+	require_moonraker_connect
+
 	local _term_cols=$((`tput cols`-5))
 	local _term_lines=$((`tput lines`/2-3))
 
@@ -53,7 +66,9 @@ status_fans(){
 	fi
 }
 
-status_extruder(){
+status.extruder(){
+	require_moonraker_connect
+	
 	local _term_cols=$((`tput cols`-5))
 	local _term_lines=$((`tput lines`/2-3))
 
@@ -89,7 +104,9 @@ status_extruder(){
 	 fi
 }
 
-status_hotbed(){
+status.hotbed(){
+	require_moonraker_connect
+	
 	local _term_cols=$((`tput cols`-5))
 	local _term_lines=$((`tput lines`/2-3))
 
@@ -121,7 +138,9 @@ status_hotbed(){
 	fi
 }
 
-status_mcutemp(){
+status.mcutemp(){
+	require_moonraker_connect
+	
 	local min_cols=130 min_lines=7 max_lines=12
 	local _term_cols=$((`tput cols`-5))  _term_lines=$((`tput lines`/2-3))
 
@@ -161,7 +180,9 @@ status_mcutemp(){
 	 fi
 }
 
-status_chambertemp(){
+status.chambertemp(){
+	require_moonraker_connect
+	
 	local _term_cols=$((`tput cols`-5))
 	local _term_lines=$((`tput lines`/2-3))
 
@@ -190,7 +211,9 @@ status_chambertemp(){
 	fi
 }
 
-status_chamberfan(){
+status.chamberfan(){
+	require_moonraker_connect
+	
 	local _term_cols=$((`tput cols`-5))
 	local _term_lines=$((`tput lines`/2-3))
 
@@ -219,7 +242,9 @@ status_chamberfan(){
 	fi		
 }
 
-status_chamberfanspeed(){
+status.chamberfanspeed(){
+	require_moonraker_connect
+	
 	local min_cols=130 min_lines=7 
 	local _term_cols=$((`tput cols`-5))  _term_lines=$((`tput lines`/2-3))
 
@@ -257,34 +282,35 @@ status_chamberfanspeed(){
 	fi	
 }
 
-
-
-status_temps(){
+status.temps(){
+	require_moonraker_connect
+	
 	term_cols=$((`tput cols`-5))
 	term_lines=$((`tput lines`/5-3))
 
 	curl --silent 'http://192.168.0.96:7125/server/temperature_store' > temperature_store.json 
-	status_extruder $term_cols $term_lines temperature_store.json
+	status.extruder $term_cols $term_lines temperature_store.json
 	_hr
-	status_hotbed $term_cols $term_lines temperature_store.json
+	status.hotbed $term_cols $term_lines temperature_store.json
 	_hr
-	status_mcutemp $term_cols $term_lines temperature_store.json
+	status.mcutemp $term_cols $term_lines temperature_store.json
 	_hr
-	status_chambertemp $term_cols $term_lines temperature_store.json
+	status.chambertemp $term_cols $term_lines temperature_store.json
 	#_hr
-	#status_chamberfan $term_cols $term_lines #temperature_store.json
+	#status.chamberfan $term_cols $term_lines #temperature_store.json
 }
 
 
+status.show(){
+	require_moonraker_connect
+	
+	echo "Checking status"
+}
+
 _debug "Arguments: $# - $*"
 
-subcmd="${1:-help}"
-subcmd_fn="status_${subcmd}"
-
-#_debug "Subcommand: ${subcmd}"
-#_debug "Function: ${subcmd_fn}"
-
-
+subcmd="${1:-show}"
+subcmd_fn="${__module_name}.${subcmd}"
 
 _debug "Subcommand: ${subcmd}"
 _debug "Function: ${subcmd_fn}"
@@ -293,7 +319,7 @@ shift
 cmd_type=$(type -t "${subcmd_fn}")
 
 if [[ ${cmd_type} == 'function' ]]; then
-	${subcmd_fn} $*
+	eval ${subcmd_fn} ${@@Q}
 else
 	_error "The command ${subcmd} is not a valid command (${subcmd_fn} not found)" && exit 1
 fi

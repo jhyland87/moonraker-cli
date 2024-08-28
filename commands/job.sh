@@ -2,20 +2,23 @@
 
 # https://blog.kellybrazil.com/2020/01/15/silly-terminal-plotting-with-jc-jq-and-jp/
 
+
+
 #echo "[print] CLI_DIR: ${CLI_DIR}"
 source ${CLI_DIR}/includes/common.sh
 source ${CLI_DIR}/includes/colors.sh
 source ${CLI_DIR}/includes/logging.sh
 source ${CLI_DIR}/includes/prompts.sh
+source ${CLI_DIR}/includes/connect.sh
 
-#export -p
-
-
+__module_path=$(realpath "${BASH_SOURCE[0]}") # /absolute/path/to/module/file.sh
+__module_dir=$(dirname "${__module_path}") # /absolute/path/to/module
+__module_file=$(basename ${__module_path}) # file.sh
+__module_name=${__module_file%%.sh} # file
 
 
 #[[ -z ${API_HOST} ]] && _error "No ${API_HOST} found" 1
 #echo "API_HOST: ${API_HOST}"
-
 
 
 # Note the quotes around '$TEMP': they are essential!
@@ -25,13 +28,13 @@ source ${CLI_DIR}/includes/prompts.sh
 declare -a show_objects
 DEBUG=false
 
-job_description(){
+job.description(){
 	# DESCRIPTION: Description of this command
 	echo "This command is for managing jobs" 1>&2
 }
 
-job_help() {
-	echo -e "${_bld_}${_dirtyyellow_}JOB COMMANDS${_none_}"
+job.help() {
+	echo -e "${_bld_}${_dirtyyellow_}${__module_name^^} COMMANDS${_none_}"
 	echo
 	echo -e "  ${_bld_}${_ital_}${_blue_}Show print job status${_none_}"
 	echo -e "     moonraker job status"
@@ -59,7 +62,9 @@ show_job_state() {
 			jq 
 }
 
-job_status (){
+job.status (){
+	require_moonraker_connect
+
 	# DESCRIPTION: Outputs the status of the current job
 	# SYNTAX: moonraker job status
 	_get /printer/objects/query 'webhooks&virtual_sdcard&print_stats' | 
@@ -67,7 +72,9 @@ job_status (){
 		# | [.message, .webhooks, .printer, .filename, .progress, .percent] | @csv
 }
 
-job_pause(){
+job.pause(){
+	require_moonraker_connect
+
 	# DESCRIPTION: Pause the current job (if there is one)
 	# SYNTAX: moonraker job pause
 
@@ -80,7 +87,9 @@ job_pause(){
 	_post /printer/print/pause | jq --raw-output '.result'
 }
 
-job_resume(){
+job.resume(){
+	require_moonraker_connect
+
 	# DESCRIPTION: Resumes a paused print job
 	# SYNTAX: moonraker job resume
 
@@ -92,8 +101,10 @@ job_resume(){
 	_post /printer/print/resume | jq --raw-output '.result'
 }
 
-job_cancel(){
-	local _job_status_output=$(job_status)
+job.cancel(){
+	require_moonraker_connect
+
+	local _job_status_output=$(job.status)
 	local _job_status=$(echo "${_job_status_output}" | jq --raw-output '.printer')
 	local _job_filename=$(echo "${_job_status_output}" | jq --raw-output '.filename')
 
@@ -113,7 +124,9 @@ job_cancel(){
 	_post /printer/print/cancel | jq --raw-output '.result'
 }
 
-job_start(){
+job.start(){
+	require_moonraker_connect
+
 	# DESCRIPTION: Start a new print job
 	# SYNTAX: moonraker job start <filename>
 
@@ -126,14 +139,16 @@ job_start(){
 	#/printer/print/start?filename=test_print.gcode
 }
 
-job_watch(){
+job.watch(){
+	require_moonraker_connect
+
 	#trap 'screen_restore' SIGINT
 	# DESCRIPTION: Watch job status data
 	# SYNTAX: moonraker job watch <metrics>
 	# EXAMPLE: moonraker job watch progress temperatures cpu logs
 	#local watch_data="${@}"
 
-	echo -e "Preparing to watch ${_command_}moonraker job $@${_none_}"
+	echo -e "Preparing to watch ${_egcmd_}moonraker job $@${_none_}"
 	sleep 0.5
 	return
 	temp_terminal
@@ -151,7 +166,6 @@ job_watch(){
 		#show_system_memory_usage
 		sleep ${GRAPH_UPDATE_INTERVAL:-3}
 	done
-
 }
 
 get_proc_stats_data(){
@@ -224,18 +238,19 @@ not_paused(){
 
 _debug "Arguments: $# - $*"
 
-subcmd="$1"
+subcmd="${1:-help}"
+subcmd_fn="${__module_name}.${subcmd}"
 
 _debug "Subcommand: $subcmd"
 shift
 
 
-cmd_type=$(type -t "job_${subcmd}")
+cmd_type=$(type -t "${subcmd_fn}")
 
 
 
 if [[ ${cmd_type} == 'function' ]]; then
-	job_$subcmd $*
+	eval ${subcmd_fn} ${@@Q}
 else
 	_error "The command ${subcmd} is not a valid function" 1
 fi

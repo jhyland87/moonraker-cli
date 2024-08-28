@@ -23,12 +23,9 @@ source ${CLI_DIR}/settings
 source ${CLI_DIR}/includes/connect.sh
 #source ${CLI_DIR}/includes/prompts.sh
 
-check_moonraker_port || _fatal "Unable to connect to moonraker at ${MOONRAKER_HOST}:${MOONRAKER_PORT}"
 
 # Global r/w integer settings
 declare -igx LOG_LEVEL=${LOG_LEVEL:=1} MOONRAKER_TIMEOUT
-
-
 
 # Readonly string values
 declare -rx 	MOONRAKER_HOST MOONRAKER_PORT MOONRAKER_PROTO \
@@ -54,7 +51,6 @@ _debug "Found gprintf at ${GPRINTF_BIN}"
 
 
 declare -gr NO_COLOR="Y"
-
 
 _get() {
 	if [[ ! $2 ]]; then
@@ -98,13 +94,14 @@ export -f _get _post
 
 _debug "INPUT is: $*"
 
-execcmd="${1?No command provided}"
+
+
+
+execcmd="${1:-help}"
 shift
-
-
 
 [[ -f "${CLI_DIR}/commands/${execcmd}.sh" ]] || _error "No subcommand found for ${execcmd}" 1
 
 #export -p 
-${CLI_DIR}/commands/${execcmd}.sh $*
+eval ${CLI_DIR}/commands/${execcmd}.sh ${*@Q}
 

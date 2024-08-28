@@ -4,30 +4,35 @@ source ${CLI_DIR}/includes/common.sh
 source ${CLI_DIR}/includes/colors.sh
 source ${CLI_DIR}/includes/logging.sh
 source ${CLI_DIR}/includes/prompts.sh
+source ${CLI_DIR}/includes/connect.sh
 
-# http://192.168.0.96:7125/printer/objects/list
-declare -a show_objects
-DEBUG=false
+__module_path=$(realpath "${BASH_SOURCE[0]}") # /absolute/path/to/module/example.sh
+__module_dir=$(dirname "${__module_path}") # /absolute/path/to/module
+__module_file=$(basename ${__module_path}) # example.sh
+__module_name=${__module_file%%.sh} # example
+# echo ${__module_name^^} # EXAMPLE
 
-watch_description(){
+
+watch.description(){
 	# DESCRIPTION: Description of this command
 	echo "This command is for watching print status" 1>&2
 }
 
-watch_help() {
-	echo -e "${_bld_}${_dirtyyellow_}PRINTER COMMANDS${_none_}"
+watch.help() {
+	echo -e "${_bld_}${_dirtyyellow_}${__module_name^^} COMMANDS${_none_}"
 	echo
 	echo -e "  ${_bld_}${_ital_}${_blue_}Test availability${_none_}"
-	echo -e "     moonraker printer test"
+	echo -e "     moonraker ${__module_name} test"
 	echo
 }
 
 
-
 _debug "Arguments: $# - $*"
 
+require_moonraker_connect
+
 #subcmd="${1:-help}"
-#subcmd_fn="watch_${subcmd}"
+#subcmd_fn="${__module_name}.${subcmd}"
 
 #_debug "Subcommand: ${subcmd}"
 #_debug "Function: ${subcmd_fn}"
@@ -46,7 +51,7 @@ while true; do
 		tput clear
 	fi
 	tput cup 0 0
-	moonraker $@
+	eval moonraker ${@@Q}
 	sleep 1;
 done
 

@@ -1,9 +1,15 @@
 #!/usr/bin/env bash
 
 
+#cwd=$(dirname "${BASH_SOURCE[0]}")
+
+
+#source "${cwd}/common.sh"
+
+
 source ${CLI_DIR}/includes/common.sh
 
-declare -r _LOG_FORMAT='%b%-25s%b  %b%8s%b: %b%s%b\n'
+declare _LOG_FORMAT='%b%-25s%b  %b%8s%b: %b%s%b\n'
 
 
 #declare -r _LOG_FORMAT='%b%-25s%b  %b%8s%b: %b%s%b\n'
@@ -76,7 +82,7 @@ _fatal() {
 	printf "${LOG_FORMAT:-${_LOG_FORMAT}}" "${_dim_}" $(_toISOtime) "${_xdim_}" "${_redb_}" "FATAL ERROR" "${_none_}" "${_white_}" "$*" "${_none_}" 1>&2
 		#printf "${LOG_FORMAT}" $(_ts) "${_yel_}ERROR${_none_}" "${1}" 1>&2
 
-	exit ${2:-1}
+	exit 1
 }
 
 declare -xg _error _warn _info _debug _fatal _ts _toISOtime

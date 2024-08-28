@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 
+
+source ${CLI_DIR}/includes/common.sh
+source ${CLI_DIR}/includes/colors.sh
+source ${CLI_DIR}/includes/logging.sh
+source ${CLI_DIR}/includes/prompts.sh
+source ${CLI_DIR}/includes/connect.sh
+
 echo "Hello from services"
 
 
@@ -39,6 +46,8 @@ help() {
 show_print_state() {
 	echo "show_print_state..."
 }
+
+require_moonraker_connect
 
 	declare -a jq_switches=()
 

@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 
 
+
+cwd=$(dirname "${BASH_SOURCE[0]}")
+
+source "${cwd}/colors.sh"
+
 #declare -rgx CLI_DIR=$(dirname $(realpath $0))
 #declare -rgx CLI_NAME=$(basename $0)
 #declare -rgx CLI_PID=$$
@@ -157,7 +162,7 @@ _hr() {
 	local termCols=${COLUMNS:-$(tput cols)}
 
 	# Get the char to be repeated, default to -
-	local char="${1:--}" 
+	local char="${1:-—}" 
 
 	# Width of the char being repeated
 	local charWidth=${#char}
@@ -177,7 +182,10 @@ _hr() {
 	#echo "hrWidth: ${hrWidth}" 1>&2
 	#echo "repeatCharCount: ${repeatCharCount}" 1>&2
 
-	echo -en "${_hr_}"
+	echo -en "${_hr_}" 1>&2
+	printf "${char}%.0s" `seq -s ' ' 1 ${repeatCharCount}` 1>&2
+	echo -e "${_none_}" 1>&2
+	return 
 	for i in $(seq 1 ${repeatCharCount}) ; do 
 		printf "${char}" 1>&2
 	done
@@ -235,6 +243,29 @@ temp_terminal(){
 	stty -echoctl
 	stty -echo
 	tput civis
+}
+
+
+# Check if a given string (first param) is in the remaining value(s)
+#   declare -a myarray=(foo bar baz)
+#   in_array bang ${myarray[@]} # returns non-zero
+#   myarray+=(bang)
+#   in_array bang ${myarray[@]} # Returns zero
+#   in_array ban ${myarray[@]}  # Returns non-zero
+#
+# Use with associative arrays
+#   declare -A mydict=([foo]=bar)
+#   in_array baz ${mydict[@]} # Returns non-zero
+# 	mydoct[baz]=bang
+# 	in_array baz ${mydict[@]} # Returns zero 
+# 
+# Check if a key is in an associative array
+# 	in_array foo ${!mydoct[@]} # Returns zero
+in_array(){
+	local searchfor="${1?No search value provided}"
+	shift
+
+	printf '%s\0' "$@" | grep -qw --null "${searchfor}"
 }
 
 _h1(){

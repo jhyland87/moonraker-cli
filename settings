@@ -52,3 +52,4 @@ export CLICOLOR=true
 # This will determine the seconds between the graphs/charts, are updated
 export GRAPH_UPDATE_INTERVAL=1
 
+export IMGCAT_BIN="/Users/jhyland/Documents/scripts/bash/imgcat"
