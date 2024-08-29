@@ -246,6 +246,7 @@ temp_terminal(){
 }
 
 
+
 # Check if a given string (first param) is in the remaining value(s)
 #   declare -a myarray=(foo bar baz)
 #   in_array bang ${myarray[@]} # returns non-zero
@@ -268,6 +269,19 @@ in_array(){
 	printf '%s\0' "$@" | grep -qw --null "${searchfor}"
 }
 
+# Nanoseconds to seconds
+# Usage
+# 	ns2sec nanoseconds [accuracy]
+# 
+# Examples
+# 	$ ns2sec `gdate +%N`  	
+# 	.641833
+# 	$ ns2sec `gdate +%N` 2 	
+# 	.64
+ns2sec(){
+	bc <<< "scale=${2:-6}; ${1?no nanoseconds value provided}/1000000000"
+}
+
 _h1(){
 	echo -e "${_h1_}$@${_none_}\n"
 }
@@ -278,4 +292,13 @@ _h2(){
 
 _h3(){
 	echo -e "${_h3_}$@${_none_}\n"
+}
+
+
+json2table(){
+	jq --monochrome-output --raw-output \
+			-L "${cwd}/../jq" \
+			--from-file "${cwd}/../jq/modifiers/array_of_objects_to_csv.jq" \
+			--arg output tsv | 
+		column -ts $'\t'
 }

@@ -49,7 +49,7 @@ history.list(){
 	# DESCRIPTION: Outputs the status of the current job
 	# SYNTAX: moonraker job status
 	_get /server/history/list 'limit=300' | 
-		jq -r '.result.jobs[] | {id: .job_id, filename: .filename, status: .status, start_time: .start_time, end_time: .end_time, print_duration: .print_duration}'
+		jq -r '[.result.jobs[] | {id: .job_id, filename: .filename, status: .status, start_time: .start_time, end_time: .end_time, print_duration: .print_duration}]' | json2table
 		# | [.message, .webhooks, .printer, .filename, .progress, .percent] | @csv
 }
 
@@ -87,11 +87,11 @@ _debug "Subcommand: $subcmd"
 shift
 
 
-cmd_type=$(type -t "${subcmd_fn}")
+cmd_type=$(type -t "$subcmd_fn")
 
 
 
-if [[ ${cmd_type} == 'function' ]]; then
+if [[ $cmd_type == function ]]; then
 	eval ${subcmd_fn} ${@@Q}
 else
 	_error "The command ${subcmd} is not a valid function" 1

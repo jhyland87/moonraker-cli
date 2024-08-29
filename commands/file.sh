@@ -41,6 +41,7 @@ file.help(){
 	echo
 }
 
+
 is_printing() {
 	local current_state=$(_get /printer/objects/query 'print_stats=state' | \
 		jq --raw-output '.result.status.print_stats.state')
@@ -69,12 +70,7 @@ file.list(){
 			--raw-output \
 			-L "${__module_dir}/../jq" \
 			--from-file "${__module_dir}/../jq/filters/file.print__recently_modified.jq"  \
-			--arg limit 10 |
-		jq --monochrome-output --raw-output \
-			-L "${__module_dir}/../jq" \
-			--from-file "${__module_dir}/../jq/modifiers/array_of_objects_to_csv.jq" \
-			--arg output tsv | 
-		column -ts $'\t'
+			--arg limit 10 | json2table
 }
 
 file.print(){
