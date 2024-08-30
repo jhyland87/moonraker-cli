@@ -34,13 +34,13 @@ example.test(){
 }
 
 example.help() {
-	echo -e "${_bld_}${_dirtyyellow_}${__module_name^^} COMMANDS${_none_}"
+	echo -e "${_helphead_}${__module_name^^} COMMANDS${_none_}"
 	echo
-	echo -e "  ${_bld_}${_ital_}${_blue_}Simple helloworld fn${_none_}"
+	echo -e "  ${_egdesc_}Simple helloworld fn${_none_}"
 	echo -e "     moonraker example helloworld"
 	echo -e "     ${_prompt_}# ${_eg_}Hello World${_none_}"
 	echo
-	echo -e "  ${_bld_}${_ital_}${_blue_}Test availability${_none_}"
+	echo -e "  ${_egdesc_}Test availability${_none_}"
 	echo -e "     moonraker example test"
 	echo
 }

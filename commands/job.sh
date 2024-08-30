@@ -169,21 +169,21 @@ job.watch(){
 }
 
 get_proc_stats_data(){
-	local tmp_filename="${1:-proc_stats.json}"
+	local tmp_filename="$TMP_DIR/${1:-proc_stats.json}"
 
 	#_get /machine/proc_stats | jq -rcM '.result' > $tmp_filename
-	_get /machine/proc_stats  > $tmp_filename
+	_get /machine/proc_stats  > "$tmp_filename"
 }
 
 show_cpu_usage(){
-	local tmp_filename="${1:-proc_stats.json}"
+	local tmp_filename="$TMP_DIR/${1:-proc_stats.json}"
 
 	echo "CPU Usage"
-	jq --from-file jq/filters/machine.proc_stats__cpu_usage.jq ${tmp_filename} | jp  -xy "..[time,cpu_usage]" -type line -width 100 -height 20
+	jq --from-file jq/filters/machine.proc_stats__cpu_usage.jq "$tmp_filename" | jp  -xy "..[time,cpu_usage]" -type line -width 100 -height 20
 }
 
 show_proc_stats_chart(){
-	local tmp_filename="${1:-proc_stats.json}"
+	local tmp_filename="$TMP_DIR/${1:-proc_stats.json}"
 
 	# http://192.168.0.96:7125/machine/proc_stats
 	# --raw-output --compact-output --monochrome-output
@@ -192,15 +192,15 @@ show_proc_stats_chart(){
 	# while true; do ps axu | jc --ps | jq '[.[] | select (.cpu_percent > 0.5)]' | jp -type bar -canvas full-escape -x ..pid -y ..cpu_percent; sleep 3; done
 	#_get /machine/proc_stats | jq -rcM '.result' > $tmp_filename
 
-	jq --raw-output '.result.system_cpu_usage | to_entries' ${tmp_filename}  |
+	jq --raw-output '.result.system_cpu_usage | to_entries' "$tmp_filename"  |
 		jp -type bar -canvas full-escape -x ..key -y ..value -height 6 -width 30
 }
 
 show_system_memory_usage(){
-	local tmp_filename="${1:-proc_stats.json}"
+	local tmp_filename="$TMP_DIR/${1:-proc_stats.json}"
 
 	read mem_total mem_available mem_used <<< $(
-		jq --raw-output '.result.system_memory | [.total, .available, .used] |@tsv' $tmp_filename
+		jq --raw-output '.result.system_memory | [.total, .available, .used] |@tsv' "$tmp_filename"
 	)
 
 	#local mem_unit_percents=$((100/${mem_total}))

@@ -32,11 +32,11 @@ file.help(){
 	echo -e "  ${_egres_}# List of contents in directory${_none_}"
 
 	echo
-	echo -e "  ${_bld_}${_ital_}${_blue_}Delete file(s)/folder(s)${_none_}"
+	echo -e "  ${_egdesc_}Delete file(s)/folder(s)${_none_}"
 	echo -e "  ${_prompt_}\$${_none_} ${_egcmd_}moonraker file delete ${_ul_}file_1.gcode${_ulx_} [${_ul_}dir/file_2.gcode${_ulx_} ${_ul_}dir/subdir${_ulx_}]${_none_}"
 	echo -e "  ${_egres_}# Will prompt for confirmation${_none_}"
 	echo
-	echo -e "  ${_prompt_}\$${_none_} ${_egcmd_}moonraker file delete ${_ul_}file_1.gcode${_ulx_} [${_ul_}dir/file_2.gcode${_ulx_} ${_ul_}dir/subdir${_ulx_}]${_none_}"
+	echo -e "  ${_prompt_}\$${_none_} ${_egcmd_}moonraker file delete -f ${_ul_}file_1.gcode${_ulx_} [${_ul_}dir/file_2.gcode${_ulx_} ${_ul_}dir/subdir${_ulx_}]${_none_}"
 	echo -e "  ${_egres_}# Will ${_ul_}not${_ulx_} prompt for confirmation${_none_}"
 	echo
 }

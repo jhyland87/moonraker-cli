@@ -53,3 +53,6 @@ export CLICOLOR=true
 export GRAPH_UPDATE_INTERVAL=1
 
 export IMGCAT_BIN="/Users/jhyland/Documents/scripts/bash/imgcat"
+
+# Relative to the moonraker-cli root
+export TMP_DIR="./tmp"
