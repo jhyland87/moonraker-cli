@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+if [[ $1 == '--description' ]]; then
+	echo "Print job related commands"
+	exit 
+fi
+
 # https://blog.kellybrazil.com/2020/01/15/silly-terminal-plotting-with-jc-jq-and-jp/
 
 

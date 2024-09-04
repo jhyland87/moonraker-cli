@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 
 
+if [[ $1 == '--description' ]]; then
+	echo "Service related commands"
+	exit 
+fi
+
 source ${CLI_DIR}/includes/common.sh
 source ${CLI_DIR}/includes/colors.sh
 source ${CLI_DIR}/includes/logging.sh

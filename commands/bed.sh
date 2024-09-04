@@ -1,11 +1,15 @@
 #!/usr/bin/env bash
 
+if [[ $1 == '--description' ]]; then
+	echo "Bed related commands"
+	exit 
+fi
+
 source ${CLI_DIR}/includes/common.sh
 source ${CLI_DIR}/includes/colors.sh
 source ${CLI_DIR}/includes/logging.sh
 source ${CLI_DIR}/includes/prompts.sh
 source ${CLI_DIR}/includes/connect.sh
-
 
 __module_path=$(realpath "${BASH_SOURCE[0]}" --relative-to) # /absolute/path/to/module/example.sh
 __module_dir=$(dirname "${__module_path}") # /absolute/path/to/module
@@ -21,12 +25,6 @@ show_printer_state() {
 
 	_get /api/printer | jq
 }
-
-bed.description(){
-	# DESCRIPTION: Description of this command
-	echo "This command is for managing jobs" 1>&2
-}
-
 
 bed.mesh(){
 	require_moonraker_connect 

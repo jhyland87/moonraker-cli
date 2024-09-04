@@ -16,16 +16,10 @@ _error(){
     printf "ERROR: %s\n" "$?" 1>&2
 }
 
-printf "Checking for %s... " "curl"
-type -fp curl 
-
-if [[ $? != 0 ]]; then
-    echo "Not found"
-    exit 1
-fi
-
-
-printf "Checking for %s... " "brew"
+#
+# STEP 1: Make sure brew is installed
+#
+printf "Checking for %-13s " "brew..."
 type -fp brew
 
 if [[ $? != 0 ]]; then
@@ -46,26 +40,111 @@ if [[ $? != 0 ]]; then
     fi
 fi
 
+echo 
+
 brew_bin=$(type -fp brew)
 
-minimum_packages="jq jp netcat"
-extra_packages="noti imgcat"
+check_brew_package(){
+    brew list | grep -Eq "^${1}$"
+}
+
+#
+# STEP 2: Make sure were using bash5 - Can be installed via brew if not found
+#
+
+printf "Checking for %-13s " "bash (v5)..."
+
+if [[ $BASH_VERSINFO < 5 ]]; then
+    echo "Old bash version ($BASH_VERSINFO) - Must use bash v5"
+    
+    check_brew_package bash && 
+        _error "Looks like bash v5 is already installed via brew - Please execute this installer with that bash binary" && 
+        exit 1
+
+    echo "Installing bash via brew... "
+    sleep 1
+
+    brew install bash
+    echo "bash5 installed successfully - Please re-execute this installer with bash v5"
+    exit
+else 
+    echo "$BASH_VERSINFO ($BASH_VERSION)"
+fi
+echo
+
+function check_or_install {
+    declare -a _packages=($@)
+
+    declare -a _notfound=()
+
+    for p in ${_packages[@]}; do
+        printf "Checking for %-13s " "${p}..."
+
+        type -fp $p 
+
+        if [[ $? != 0 ]]; then
+            echo "Not found"
+            _notfound+=($p)
+        fi
+    done
+
+    if [[ ${#_notfound[@]}  -gt 0 ]]; then
+        echo
+        echo "There are ${#_notfound[@]} packages to install:  ${_notfound[@]}"
+        sleep 1
+
+        echo "Executing: brew install ${_notfound[@]}..."
+        sleep 1
+        
+        brew install ${_notfound[@]}
+        
+        [[ $? -ne 0 ]] && 
+            echo && 
+            _error "Brew returned non-zero exit status" &&
+            exit 1
+
+        echo
+        echo "Brew installed ${#_notfound[@]} package(s) successfully"
+        sleep 1
+    fi
+}
+
+#check_or_install curl 
+
+
+
+minimum_packages="curl jq jp netcat"
+extra_packages="noti httping"
 
 install_minimum(){
-    echo "Installing minimum packages: ${minimum_packages}"
-    brew install ${minimum_packages}
+    echo "Verifying minimum packages: ${minimum_packages}"
+    check_or_install $minimum_packages
 
     [[ $? != 0 ]] && _error "Error installing minimum packages" && exit 1
 }
 
 install_extra(){
-    echo "Installing extra packages: ${extra_packages}"
-    brew install ${extra_packages}
+    echo "Verifying extra packages: ${extra_packages}"
+    check_or_install $extra_packages
 
     [[ $? != 0 ]] && _error "Error installing extra packages" && exit 1
 }
 
+install_all(){
+    echo "Verifying all packages: ${minimum_packages} ${extra_packages}"
+    check_or_install $minimum_packages $extra_packages
 
-install_minimum && install_extra
+    [[ $? != 0 ]] && _error "Error installing all packages" && exit 1
+}
 
-sudo ln -vs $(realpath ./moonraker) /usr/local/bin/moonraker
+#install_minimum && install_extra
+install_all
+echo
+
+if ! test -L /usr/local/bin/moonraker; then
+    echo "Creating symlink /usr/local/bin/moonraker for moonraker script at $(realpath ./moonraker)"
+    sleep 1
+    sudo ln -vs $(realpath ./moonraker) 
+else
+    echo "Moonraker symlink found at /usr/local/bin/moonraker"
+fi

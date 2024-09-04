@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+if [[ $1 == '--description' ]]; then
+	echo "File related commands"
+	exit 
+fi
+
 #echo "[print] CLI_DIR: ${CLI_DIR}"
 source ${CLI_DIR}/includes/common.sh
 source ${CLI_DIR}/includes/colors.sh

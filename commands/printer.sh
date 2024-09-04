@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+
+if [[ $1 == '--description' ]]; then
+	echo "Printer related commands"
+	exit 
+fi
+
 #SCRIPT_DIR=$(dirname "${BASH_SOURCE[0]}")
 
 source ${CLI_DIR}/includes/common.sh

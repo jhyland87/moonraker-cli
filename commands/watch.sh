@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+
+if [[ $1 == '--description' ]]; then
+	echo "Watch the output of specified moonraker-cli command"
+	exit 
+fi
+
 source ${CLI_DIR}/includes/common.sh
 source ${CLI_DIR}/includes/colors.sh
 source ${CLI_DIR}/includes/logging.sh

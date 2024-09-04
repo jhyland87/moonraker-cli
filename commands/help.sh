@@ -2,12 +2,23 @@
 
 
 listcommands(){
-	local cmdlist=$(ls -1 commands | sed -E -e 's/\.sh$//g')
+	local cmdlist=$(ls -1 commands | sed -E -e 's/\.sh$//g' | grep -Ev '^(example|help)$')
 
+	echo "Available commands: "
 
-	#export -f _help _description
+	for cmd in $cmdlist; do
+		printf "    %-10s - " "${cmd}"
+
+		./commands/${cmd}.sh --description
+	done 
 }
 
 
-
-echo "Hello from help"
+echo "moonraker - commandline moonraker interface"
+echo
+echo "Usage:  moonraker <command> [options...]"
+echo
+echo "Example:"
+echo 
+echo "    moonraker printer status"
+listcommands
