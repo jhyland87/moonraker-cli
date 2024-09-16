@@ -1,6 +1,14 @@
 
 
 
+# Install
+```bash
+$ git clone https://github.com/jhyland87/moonraker-cli.git
+$ ./moonraker-cli/install
+```
+
+This should try to create a symlink to the `./moonraker-cli/moonraker` file at `/usr/local/bin/moonraker`. 
+
 # Usage
 `moonraker <subcommand> <arguments>`
 
