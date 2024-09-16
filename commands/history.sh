@@ -2,8 +2,8 @@
 
 # https://blog.kellybrazil.com/2020/01/15/silly-terminal-plotting-with-jc-jq-and-jp/
 
-#echo "[print] CLI_DIR: ${CLI_DIR}"
-source ${CLI_DIR}/includes/common.sh
+#echo "[print] CLI_DIR: ${CLI_DIR:=./}"
+source ${CLI_DIR:=./}/includes/common.sh
 source ${CLI_DIR}/includes/colors.sh
 source ${CLI_DIR}/includes/logging.sh
 source ${CLI_DIR}/includes/prompts.sh
@@ -18,6 +18,26 @@ __module_file=$(basename ${__module_path}) # file.sh
 __module_name=${__module_file%%.sh} # file
 
 
+history.description(){
+	# DESCRIPTION: Description of this command
+	echo "View print job history" 1>&2
+	#exit
+}
+
+history.help() {
+	echo -e "${_bld_}${_dirtyyellow_}${__module_name^^} COMMANDS${_none_}"
+	echo
+	echo -e "  ${_bld_}${_ital_}${_blue_}Show recent print jobs${_none_}"
+	echo -e "     moonraker history latest"
+	echo
+	#exit
+}
+
+[[ $# -eq 0 ]] && exit
+[[ $1 == 'description' ]] && eval ${__module_name}.description && exit
+[[ $1 == 'help' ]] && eval ${__module_name}.help && exit
+
+
 #[[ -z ${API_HOST} ]] && _error "No ${API_HOST} found" 1
 #echo "API_HOST: ${API_HOST}"
 
@@ -30,18 +50,6 @@ __module_name=${__module_file%%.sh} # file
 declare -a show_objects
 DEBUG=false
 
-history.description(){
-	# DESCRIPTION: Description of this command
-	echo "This command is for managing jobs" 1>&2
-}
-
-history.help() {
-	echo -e "${_bld_}${_dirtyyellow_}${__module_name^^} COMMANDS${_none_}"
-	echo
-	echo -e "  ${_bld_}${_ital_}${_blue_}Show recent print jobs${_none_}"
-	echo -e "     moonraker history latest"
-	echo
-}
 
 history.list(){
 	require_moonraker_connect
@@ -86,17 +94,16 @@ subcmd_fn="${__module_name}.$subcmd"
 _debug "Subcommand: $subcmd"
 shift
 
+#cmd_type=$(type -t "${subcmd_fn}")
 
-cmd_type=$(type -t "$subcmd_fn")
-
-
-
-if [[ $cmd_type == function ]]; then
-	eval ${subcmd_fn} ${@@Q}
-else
-	_error "The command ${subcmd} is not a valid function" 1
+# Make sure the sumcommand is a defined function
+if [[ $(type -t "${subcmd_fn}") != 'function' ]]; then
+	_error "The command ${subcmd} is not a valid subcommand for ${__module_name}" 
+	exit 2
 fi
 
+# Execute the full command
+eval ${subcmd_fn} ${@@Q}
 
 #TEMP=$(getopt -o hlsSTRP: --long help,list,status,stop,start,pause,resume: -n 'wtf' -- "$*")
 

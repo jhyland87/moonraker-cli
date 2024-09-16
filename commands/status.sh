@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source ${CLI_DIR}/includes/common.sh
+source ${CLI_DIR:=./}/includes/common.sh
 source ${CLI_DIR}/includes/colors.sh
 source ${CLI_DIR}/includes/logging.sh
 source ${CLI_DIR}/includes/prompts.sh
@@ -32,6 +32,10 @@ status.help() {
 	echo -e "     moonraker status extruder"
 	echo
 }
+
+[[ $# -eq 0 ]] && exit
+[[ $1 == 'description' ]] && eval ${__module_name}.description && exit
+[[ $1 == 'help' ]] && eval ${__module_name}.help && exit
 
 status.fans(){
 	require_moonraker_connect
@@ -316,11 +320,13 @@ _debug "Subcommand: ${subcmd}"
 _debug "Function: ${subcmd_fn}"
 shift
 
-cmd_type=$(type -t "${subcmd_fn}")
+#cmd_type=$(type -t "${subcmd_fn}")
 
-if [[ ${cmd_type} == 'function' ]]; then
-	eval ${subcmd_fn} ${@@Q}
-else
-	_error "The command ${subcmd} is not a valid command (${subcmd_fn} not found)" && exit 1
+# Make sure the sumcommand is a defined function
+if [[ $(type -t "${subcmd_fn}") != 'function' ]]; then
+	_error "The command ${subcmd} is not a valid subcommand for ${__module_name}" 
+	exit 2
 fi
 
+# Execute the full command
+eval ${subcmd_fn} ${@@Q}

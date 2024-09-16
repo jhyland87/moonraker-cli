@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #echo "[print] CLI_DIR: ${CLI_DIR}"
-source ${CLI_DIR}/includes/common.sh
+source ${CLI_DIR:=./}/includes/common.sh
 source ${CLI_DIR}/includes/colors.sh
 source ${CLI_DIR}/includes/logging.sh
 source ${CLI_DIR}/includes/prompts.sh
@@ -15,6 +15,22 @@ __module_name=${__module_file%%.sh} # example
 
 
 
+macro.description(){
+	# DESCRIPTION: Description of this command
+	#confirm_action
+	echo "List or execute macros" 1>&2
+}
+
+macro.help() {
+	echo "Help..." 1>&2
+
+	declare -pf  | grep -E -A4  '^macro.' # | sed -E 's/^declare .* macro.//g'
+}
+
+[[ $# -eq 0 ]] && exit
+[[ $1 == 'description' ]] && eval ${__module_name}.description && exit
+[[ $1 == 'help' ]] && eval ${__module_name}.help && exit
+
 #[[ -z ${API_HOST} ]] && _error "No ${API_HOST} found" 1
 #echo "API_HOST: ${API_HOST}"
 
@@ -26,18 +42,6 @@ __module_name=${__module_file%%.sh} # example
 # http://192.168.0.96:7125/printer/objects/list
 declare -a show_objects
 DEBUG=false
-
-macro.description(){
-	# DESCRIPTION: Description of this command
-	confirm_action
-	echo "This command is for managing jobs" 1>&2
-}
-
-macro.help() {
-	echo "Help..." 1>&2
-
-	declare -pf  | grep -E -A4  '^macro.' # | sed -E 's/^declare .* macro.//g'
-}
 
 
 macro.help(){
@@ -114,15 +118,16 @@ _debug "Subcommand: $subcmd"
 shift
 
 
-cmd_type=$(type -t "${subcmd_fn}")
+#cmd_type=$(type -t "${subcmd_fn}")
 
-
-
-if [[ ${cmd_type} == 'function' ]]; then
-	eval ${subcmd_fn} ${@@Q}
-else
-	_error "The command ${subcmd} is not a valid function" 1
+# Make sure the sumcommand is a defined function
+if [[ $(type -t "${subcmd_fn}") != 'function' ]]; then
+	_error "The command ${subcmd} is not a valid subcommand for ${__module_name}" 
+	exit 2
 fi
+
+# Execute the full command
+eval ${subcmd_fn} ${@@Q}
 
 
 #TEMP=$(getopt -o hlsSTRP: --long help,list,status,stop,start,pause,resume: -n 'wtf' -- "$*")

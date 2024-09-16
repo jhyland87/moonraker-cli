@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source ${CLI_DIR}/includes/common.sh
+source ${CLI_DIR:=./}/includes/common.sh
 source ${CLI_DIR}/includes/colors.sh
 source ${CLI_DIR}/includes/logging.sh
 source ${CLI_DIR}/includes/prompts.sh
@@ -12,25 +12,10 @@ __module_file=$(basename ${__module_path}) # example.sh
 __module_name=${__module_file%%.sh} # example
 # echo ${__module_name^^} # EXAMPLE
 
-show_printer_state() {
-	require_moonraker_connect 
-	
-	local limit="${1:-20}"
-
-	_get /api/printer | jq
-}
 
 example.description(){
 	# DESCRIPTION: Description of this command
 	echo "This command is for managing jobs" 1>&2
-}
-
-example.helloworld(){
-	echo "Hello world from ${__module_name} (${__module_path})"
-}
-
-example.test(){
-	show_printer_state
 }
 
 example.help() {
@@ -43,6 +28,26 @@ example.help() {
 	echo -e "  ${_egdesc_}Test availability${_none_}"
 	echo -e "     moonraker example test"
 	echo
+}
+
+[[ $# -eq 0 ]] && exit
+[[ $1 == 'description' ]] && eval ${__module_name}.description && exit
+[[ $1 == 'help' ]] && eval ${__module_name}.help && exit
+
+show_printer_state() {
+	require_moonraker_connect 
+	
+	local limit="${1:-20}"
+
+	_get /api/printer | jq
+}
+
+example.helloworld(){
+	echo "Hello world from ${__module_name} (${__module_path})"
+}
+
+example.test(){
+	show_printer_state
 }
 
 _debug "Arguments: $# - $*"
@@ -58,10 +63,13 @@ _debug "Subcommand: ${subcmd}"
 _debug "Function: ${subcmd_fn}"
 shift
 
-cmd_type=$(type -t "${subcmd_fn}")
+#cmd_type=$(type -t "${subcmd_fn}")
 
-if [[ ${cmd_type} == 'function' ]]; then
-	eval ${subcmd_fn} $*
-else
-	_error "The command ${subcmd_fn} is not a valid function" && exit 1
+# Make sure the sumcommand is a defined function
+if [[ $(type -t "${subcmd_fn}") != 'function' ]]; then
+	_error "The command ${subcmd} is not a valid subcommand for ${__module_name}" 
+	exit 2
 fi
+
+# Execute the full command
+eval ${subcmd_fn} ${@@Q}

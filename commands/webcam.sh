@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source ${CLI_DIR}/includes/common.sh
+source ${CLI_DIR:=./}/includes/common.sh
 source ${CLI_DIR}/includes/colors.sh
 source ${CLI_DIR}/includes/logging.sh
 source ${CLI_DIR}/includes/prompts.sh
@@ -16,6 +16,24 @@ webcam.description(){
 	# DESCRIPTION: Description of this command
 	echo "This command for viewing the webcam" 1>&2
 }
+
+# echo ${LC_TERMINAL} ${TERM_PROGRAM}
+# iTerm2 iTerm.app
+webcam.help() {
+	echo -e "${_bld_}${_dirtyyellow_}${__module_name^^} COMMANDS${_none_}"
+	echo
+	echo -e "  ${_bld_}${_ital_}${_blue_}Get a single webcam snapshot${_none_}"
+	echo -e "     moonraker example helloworld"
+	echo -e "     ${_prompt_}# ${_eg_}Hello World${_none_}"
+	echo
+	echo -e "  ${_bld_}${_ital_}${_blue_}Test availability${_none_}"
+	echo -e "     moonraker example test"
+	echo
+}
+
+[[ $# -eq 0 ]] && exit
+[[ $1 == 'description' ]] && eval ${__module_name}.description && exit
+[[ $1 == 'help' ]] && eval ${__module_name}.help && exit
 
 # View webcam snapshot
 # TODO: Check that imgcat is present and that were using iterm
@@ -60,20 +78,6 @@ webcam.test(){
 	show_printer_state
 }
 
-# echo ${LC_TERMINAL} ${TERM_PROGRAM}
-# iTerm2 iTerm.app
-webcam.help() {
-	echo -e "${_bld_}${_dirtyyellow_}${__module_name^^} COMMANDS${_none_}"
-	echo
-	echo -e "  ${_bld_}${_ital_}${_blue_}Get a single webcam snapshot${_none_}"
-	echo -e "     moonraker example helloworld"
-	echo -e "     ${_prompt_}# ${_eg_}Hello World${_none_}"
-	echo
-	echo -e "  ${_bld_}${_ital_}${_blue_}Test availability${_none_}"
-	echo -e "     moonraker example test"
-	echo
-}
-
 _debug "Arguments: $# - $*"
 
 subcmd="${1:-help}"
@@ -83,10 +87,13 @@ _debug "Subcommand: ${subcmd}"
 _debug "Function: ${subcmd_fn}"
 shift
 
-cmd_type=$(type -t "${subcmd_fn}")
+#cmd_type=$(type -t "${subcmd_fn}")
 
-if [[ ${cmd_type} == 'function' ]]; then
-	eval ${subcmd_fn} ${@@Q}
-else
-	_error "The command ${subcmd_fn} is not a valid function" && exit 1
+# Make sure the sumcommand is a defined function
+if [[ $(type -t "${subcmd_fn}") != 'function' ]]; then
+	_error "The command ${subcmd} is not a valid subcommand for ${__module_name}" 
+	exit 2
 fi
+
+# Execute the full command
+eval ${subcmd_fn} ${@@Q}

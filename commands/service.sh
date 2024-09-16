@@ -1,23 +1,22 @@
 #!/usr/bin/env bash
 
-
-source ${CLI_DIR}/includes/common.sh
+source ${CLI_DIR:=./}/includes/common.sh
 source ${CLI_DIR}/includes/colors.sh
 source ${CLI_DIR}/includes/logging.sh
 source ${CLI_DIR}/includes/prompts.sh
 source ${CLI_DIR}/includes/connect.sh
 
-echo "Hello from services"
+__module_path=$(realpath "${BASH_SOURCE[0]}") # /absolute/path/to/module/file.sh
+__module_dir=$(dirname "${__module_path}") # /absolute/path/to/module
+__module_file=$(basename ${__module_path}) # file.sh
+__module_name=${__module_file%%.sh} # file
 
+#[[ -z ${API_HOST} ]] && _err "No ${API_HOST} found" 1
 
-[[ -z ${API_HOST} ]] && _err "No ${API_HOST} found" 1
+#TEMP=$(getopt -o hl: --long help,list: \
+#	        	-n 'wtf' -- "$@")
 
-
-
-TEMP=$(getopt -o hl: --long help,list: \
-	        	-n 'wtf' -- "$@")
-
-[[ $? != 0 ]] && err "Getopt failed" 1
+#[[ $? != 0 ]] && err "Getopt failed" 1
 
 # Note the quotes around '$TEMP': they are essential!
 #eval set -- "$TEMP"
@@ -39,9 +38,19 @@ function printer_state {
 	  	jq '.result.status | {message: last(.print_stats.message, .webhooks.state_message | select(. != "")), webhooks: .webhooks.state, printer: .print_stats.state, filename: .print_stats.filename, progress: .virtual_sdcard.progress} | with_entries(if .value == null or .value == "" then empty else . end)'
 }
 
-help() {
-	echo "Help..."
+service.help() {
+	echo "Help..." 1>&2
 }
+
+service.description(){
+	# DESCRIPTION: Description of this command
+	echo "This command is for managing services" 1>&2
+	#exit
+}
+
+[[ $# -eq 0 ]] && exit
+[[ $1 == 'description' ]] && eval ${__module_name}.description && exit
+[[ $1 == 'help' ]] && eval ${__module_name}.help && exit
 
 show_print_state() {
 	echo "show_print_state..."
@@ -112,3 +121,15 @@ require_moonraker_connect
 	    * ) break ;;
 	  esac
 	done
+
+
+#cmd_type=$(type -t "${subcmd_fn}")
+
+# Make sure the sumcommand is a defined function
+if [[ $(type -t "${subcmd_fn}") != 'function' ]]; then
+	_error "The command ${subcmd} is not a valid subcommand for ${__module_name}" 
+	exit 2
+fi
+
+# Execute the full command
+eval ${subcmd_fn} ${@@Q}
