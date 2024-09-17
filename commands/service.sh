@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source ${CLI_DIR:=./}/includes/common.sh
+source ${CLI_DIR:=.}/includes/common.sh
 source ${CLI_DIR}/includes/colors.sh
 source ${CLI_DIR}/includes/logging.sh
 source ${CLI_DIR}/includes/prompts.sh

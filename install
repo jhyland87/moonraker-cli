@@ -1,16 +1,17 @@
 #!/usr/bin/env bash
 
 # Verify installed components  (* = may not be needed):
-# 	- bash5 - duh
-# 	- brew 	- Installer
-# 	- curl	- To curl stuff
-# 	- jq 		- Json parser
-# 	- *jc 	- For converting some common command output to json
-# 	- jp 		- For graphing
-# 	- *imgcat - For webcam view stuff
-# 	- netcat - For checking if specific ports are online
-# 	- gdate - A better alternative to date cmd
-# 	- noti - Notifications for job completions, errors, etc
+# 	- bash5     duh
+# 	- brew 	    Installer
+# 	- curl	    To curl stuff
+# 	- jq 		Json parser
+# 	- *jc 	    For converting some common command output to json
+# 	- jp 		For graphing
+# 	- *imgcat   For webcam view stuff
+# 	- netcat    For checking if specific ports are online
+# 	- gdate     A better alternative to date cmd
+# 	- noti      Notifications for job completions, errors, etc
+#   - yq        For parsing yml config files
 
 _error(){
     printf "ERROR: %s\n" "$?" 1>&2
@@ -113,7 +114,7 @@ function check_or_install {
 
 
 
-minimum_packages="curl jq jp netcat"
+minimum_packages="curl jq jp yq gawk netcat"
 extra_packages="noti httping"
 
 install_minimum(){
