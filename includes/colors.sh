@@ -196,11 +196,19 @@ function decolor {
 }
 
 
+
 # Use specific styles
 _h1_="\e[38;5;11;1;4m"
 _h2_="\e[38;5;87;1;4m"
 _h3_="\e[38;5;75;4m"
 _eg_="\e[0;38;5;242;3m"
+
+function _h1 {
+    echo "$*"
+    local content="$*"
+    echo "content: ${content^^}"
+    printf "%b%s%b" "${_h1_}" "${content}" "${_none_}"
+}
 
 # The $ used in example text
 _prompt_="\e[38;5;239;3m"
@@ -216,6 +224,9 @@ _egcmd_="\e[1m"
 _egres_="\e[38;5;255;2;3m"
 
 _command_="\e[38;5;117;3m"
+
+_commandDim_="${_dim_}"
+
 #_hr_="\e[38;5;138;1m"
 _hr_="\e[2m"
 

@@ -1,12 +1,8 @@
 #!/usr/bin/env bash
 
-if [[ $1 == '--description' ]]; then
-	echo "File related commands"
-	exit 
-fi
 
 #echo "[print] CLI_DIR: ${CLI_DIR}"
-source ${CLI_DIR}/includes/common.sh
+source ${CLI_DIR:=./}/includes/common.sh
 source ${CLI_DIR}/includes/colors.sh
 source ${CLI_DIR}/includes/logging.sh
 source ${CLI_DIR}/includes/prompts.sh
@@ -24,6 +20,7 @@ __module_name=${__module_file%%.sh} # file
 file.description(){
 	# DESCRIPTION: Description of this command
 	echo "This command is for managing files" 1>&2
+	#exit
 }
 
 file.help(){
@@ -44,7 +41,12 @@ file.help(){
 	echo -e "  ${_prompt_}\$${_none_} ${_egcmd_}moonraker file delete -f ${_ul_}file_1.gcode${_ulx_} [${_ul_}dir/file_2.gcode${_ulx_} ${_ul_}dir/subdir${_ulx_}]${_none_}"
 	echo -e "  ${_egres_}# Will ${_ul_}not${_ulx_} prompt for confirmation${_none_}"
 	echo
+	#exit
 }
+
+[[ $# -eq 0 ]] && exit
+[[ $1 == 'description' ]] && eval ${__module_name}.description && exit
+[[ $1 == 'help' ]] && eval ${__module_name}.help && exit 
 
 
 is_printing() {
@@ -176,6 +178,8 @@ file.rm(){
 #	echo "${p}"
 #done
 
+
+
 _debug "Arguments: $# - $*"
 
 subcmd="${1:-help}"
@@ -187,10 +191,13 @@ _debug "Subcommand: $subcmd"
 shift
 
 
-cmd_type=$(type -t "${subcmd_fn}")
+#cmd_type=$(type -t "${subcmd_fn}")
 
-if [[ ${cmd_type} == 'function' ]]; then
-	eval ${subcmd_fn} ${@@Q}
-else
-	_error "The command ${subcmd} is not a valid subcommand for ${__module_name}" 1
+# Make sure the sumcommand is a defined function
+if [[ $(type -t "${subcmd_fn}") != 'function' ]]; then
+	_error "The command ${subcmd} is not a valid subcommand for ${__module_name}" 
+	exit 2
 fi
+
+# Execute the full command
+eval ${subcmd_fn} ${@@Q}

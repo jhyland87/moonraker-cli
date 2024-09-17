@@ -1,12 +1,6 @@
 #!/usr/bin/env bash
 
-
-if [[ $1 == '--description' ]]; then
-	echo "Watch the output of specified moonraker-cli command"
-	exit 
-fi
-
-source ${CLI_DIR}/includes/common.sh
+source ${CLI_DIR:=./}/includes/common.sh
 source ${CLI_DIR}/includes/colors.sh
 source ${CLI_DIR}/includes/logging.sh
 source ${CLI_DIR}/includes/prompts.sh
@@ -31,6 +25,10 @@ watch.help() {
 	echo -e "     moonraker ${__module_name} test"
 	echo
 }
+
+[[ $# -eq 0 ]] && exit
+[[ $1 == 'description' ]] && eval ${__module_name}.description && exit
+[[ $1 == 'help' ]] && eval ${__module_name}.help && exit
 
 
 _debug "Arguments: $# - $*"

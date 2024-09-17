@@ -1,14 +1,8 @@
 #!/usr/bin/env bash
 
-
-if [[ $1 == '--description' ]]; then
-	echo "Printer related commands"
-	exit 
-fi
-
 #SCRIPT_DIR=$(dirname "${BASH_SOURCE[0]}")
 
-source ${CLI_DIR}/includes/common.sh
+source ${CLI_DIR:=./}/includes/common.sh
 source ${CLI_DIR}/includes/colors.sh
 source ${CLI_DIR}/includes/logging.sh
 source ${CLI_DIR}/includes/prompts.sh
@@ -27,7 +21,7 @@ DEBUG=false
 
 printer.description(){
 	# DESCRIPTION: Description of this command
-	echo "This command is for managing jobs" 1>&2
+	echo "List, view and query printers" 1>&2
 }
 
 printer.help() {
@@ -36,6 +30,14 @@ printer.help() {
 	echo -e "  ${_bld_}${_ital_}${_blue_}Test availability${_none_}"
 	echo -e "     moonraker printer test"
 	echo
+}
+
+[[ $# -eq 0 ]] && exit
+[[ $1 == 'description' ]] && eval ${__module_name}.description && exit
+[[ $1 == 'help' ]] && eval ${__module_name}.help && exit
+
+printer.connect(){
+	echo "Switching to new printer"
 }
 
 show_printer_state() {
@@ -161,10 +163,13 @@ _debug "Subcommand: ${subcmd}"
 _debug "Function: ${subcmd_fn}"
 shift
 
-cmd_type=$(type -t "${subcmd_fn}")
+#cmd_type=$(type -t "${subcmd_fn}")
 
-if [[ ${cmd_type} == 'function' ]]; then
-	eval ${subcmd_fn} ${@@Q}
-else
-	_error "The command ${subcmd} is not a valid function" && exit 1
+# Make sure the sumcommand is a defined function
+if [[ $(type -t "${subcmd_fn}") != 'function' ]]; then
+	_error "The command ${subcmd} is not a valid subcommand for ${__module_name}" 
+	exit 2
 fi
+
+# Execute the full command
+eval ${subcmd_fn} ${@@Q}
