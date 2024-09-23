@@ -114,7 +114,7 @@ function check_or_install {
 
 
 
-minimum_packages="curl jq jp yq gawk netcat"
+minimum_packages="curl jq jp yq gawk netcat socat"
 extra_packages="noti httping"
 
 install_minimum(){

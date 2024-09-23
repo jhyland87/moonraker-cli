@@ -52,8 +52,8 @@
 #    
 
 include "utils"; 
-(if type!="array" then error("root needs to be an array") end)
-| (if (.[0] | type!="object") then error("first array entry is not an object") end)
+(if type != "array" then error("root needs to be an array") end)
+| (if (.[0] | type != "object") then error("first array entry is not an object") end)
 | (.[0] | to_entries | map(.key)) as $column_names 
 | (if length == 0 then halt end)
 | (

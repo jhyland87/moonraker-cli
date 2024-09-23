@@ -86,6 +86,16 @@ _post() {
 	fi
 }
 
+declare -A command_aliases
+
+if [[ -e ./config/aliases.cfg ]]; then
+	while read line; do
+		_alias=$(echo "${line}" | cut -d'=' -f1)
+		_cmd=$(echo "${line}" | cut -d'=' -f2)
+		command_aliases[$_alias]=$_cmd
+		_debug "Added alias $_alias for $_cmd"
+	done <<< $(grep -EO '^[a-z]+=[a-z]+$'  ./config/aliases.cfg)
+fi
 
 export -f _error _warn _info _debug  _ts
 export -f _get _post
@@ -95,12 +105,17 @@ export -f _get _post
 _debug "INPUT is: $*"
 
 
-
+test -f ${TMP_DIR} || mkdir ${TMP_DIR} &>/dev/null
 
 execcmd="${1:-help}"
+
+test ${command_aliases[${execcmd}]} && execcmd=${command_aliases[${execcmd}]}
+
 shift
 
-[[ -f "${CLI_DIR}/commands/${execcmd}.sh" ]] || _error "No subcommand found for ${execcmd}" 1
+
+
+test -f "${CLI_DIR}/commands/${execcmd}.sh" || _error "No subcommand found for ${execcmd}" 1
 
 #export -p 
 eval ${CLI_DIR}/commands/${execcmd}.sh ${*@Q}
