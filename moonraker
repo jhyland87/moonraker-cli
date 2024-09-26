@@ -51,6 +51,42 @@ _debug "Found gprintf at ${GPRINTF_BIN}"
 
 declare -gr NO_COLOR="Y"
 
+_rpc(){
+	local _type=${1?No HTTP request type provided}
+	local _target=${2?No HTTP request target provided}
+	local _data="${3}"
+
+	if [[ ! $_data ]]; then
+		curl ${API_HOST} \
+			--request ${_type^^} \
+		  	--request-target $_target \
+		  	--connect-timeout ${MOONRAKER_TIMEOUT:-5} \
+		  	--silent 
+	else
+		curl ${API_HOST} \
+		  	--request GET \
+		  	--request-target "${1?-No request target provided}" \
+		  	--connect-timeout ${MOONRAKER_TIMEOUT:-5} \
+		  	--silent \
+		  	--data "${_data}"
+	fi
+}
+
+# # HTTP GET 
+# _get(){
+# 	_rpc GET "${1?-No request target provided}" "${2}" 
+# }
+
+# _post(){
+# 	_rpc POST "${1?-No request target provided}" "${2}" 
+# }
+
+# _delete(){
+# 	_rpc DELETE "${1?-No request target provided}" "${2}" 
+# }
+
+
+
 _get() {
 	if [[ ! $2 ]]; then
 		curl ${API_HOST} \
@@ -70,10 +106,27 @@ _get() {
 	  #'webhooks&virtual_sdcard&print_stats'
 }
 
+# HTTP GET 
 _post() {
 	if [[ ! $2 ]]; then
 		curl ${API_HOST} \
 		  --request POST \
+		  --request-target "${1?-No request target provided}" \
+		  --silent
+	else
+		curl ${API_HOST} \
+		  --request POST \
+		  --request-target "${1?-No request target provided}" \
+		  --silent \
+		  --data "${2}"
+	fi
+}
+
+# HTTP DELETE 
+_delete() {
+	if [[ ! $2 ]]; then
+		curl ${API_HOST} \
+		  --request DELETE \
 		  --request-target "${1?-No request target provided}" \
 		  --silent
 	else
@@ -104,7 +157,7 @@ if [[ -e ./config/aliases.cfg ]]; then
 fi
 
 export -f _error _warn _info _debug  _ts
-export -f _get _post
+export -f _rpc _get _post _delete
 
 #declare -xf error _warn _info _debug  _ts _get _post
 

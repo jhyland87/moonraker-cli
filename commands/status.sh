@@ -70,6 +70,11 @@ status.fans(){
 	fi
 }
 
+status.socket(){
+	require_moonraker_connect
+}
+
+
 status.extruder(){
 	require_moonraker_connect
 	

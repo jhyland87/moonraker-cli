@@ -46,6 +46,13 @@ access.apikey(){
 	_get "/access/api_key" | jq '.result'
 }
 
+access.refreshjwt(){
+	require_moonraker_connect 
+	[[ ! -f ~/.moonraker-auth ]] && echo "No auth file found at ~/.moonraker-auth" 1>&2 && return 1
+	local refresh_token=$()
+	_post "/access/refresh_jwt" "refresh_token=" | jq '.result'
+}
+
 access.login(){
 	require_moonraker_connect 
 	_post "/access/login" "username=jhyland;password=68477f9;source=moonraker" | tee ~/.moonraker-auth | jq '.result | {username, token}' | yq e -P -
