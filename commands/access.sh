@@ -6,28 +6,28 @@ source ${CLI_DIR}/includes/logging.sh
 source ${CLI_DIR}/includes/prompts.sh
 source ${CLI_DIR}/includes/connect.sh
 
-__module_path=$(realpath "${BASH_SOURCE[0]}") # /absolute/path/to/module/example.sh
+__module_path=$(realpath "${BASH_SOURCE[0]}") # /absolute/path/to/module/access.sh
 __module_dir=$(dirname "${__module_path}") # /absolute/path/to/module
-__module_file=$(basename ${__module_path}) # example.sh
-__module_name=${__module_file%%.sh} # example
+__module_file=$(basename ${__module_path}) # access.sh
+__module_name=${__module_file%%.sh} # access
 __moonraker_base_dir=$(realpath "${__module_dir}/../")
-# echo ${__module_name^^} # EXAMPLE
+# echo ${__module_name^^} # ACCESS
 
 
-example.description(){
+access.description(){
 	# DESCRIPTION: Description of this command
 	echo "This command is for managing jobs" 1>&2
 }
 
-example.help() {
+access.help() {
 	echo -e "${_helphead_}${__module_name^^} COMMANDS${_none_}"
 	echo
 	echo -e "  ${_egdesc_}Simple helloworld fn${_none_}"
-	echo -e "     moonraker example helloworld"
+	echo -e "     moonraker access helloworld"
 	echo -e "     ${_prompt_}# ${_eg_}Hello World${_none_}"
 	echo
 	echo -e "  ${_egdesc_}Test availability${_none_}"
-	echo -e "     moonraker example test"
+	echo -e "     moonraker access test"
 	echo
 }
 
@@ -35,20 +35,40 @@ example.help() {
 [[ $1 == 'description' ]] && eval ${__module_name}.description && exit
 [[ $1 == 'help' ]] && eval ${__module_name}.help && exit
 
-show_printer_state() {
+
+access.oneshot(){
 	require_moonraker_connect 
-	
-	local limit="${1:-20}"
-
-	_get /api/printer | jq
+	_get "/access/oneshot_token" | jq '.result'
 }
 
-example.helloworld(){
-	echo "Hello world from ${__module_name} (${__module_path})"
+access.apikey(){
+	require_moonraker_connect 
+	_get "/access/api_key" | jq '.result'
 }
 
-example.test(){
-	show_printer_state
+access.login(){
+	require_moonraker_connect 
+	_post "/access/login" "username=jhyland;password=68477f9;source=moonraker" | tee ~/.moonraker-auth | jq '.result | {username, token}' | yq e -P -
+}
+
+access.logout(){
+	require_moonraker_connect 
+	_post "/access/logout" | jq '.result'
+}
+
+access.id(){
+	require_moonraker_connect 
+	_get "/access/user" | jq '.result'
+}
+
+access.info(){
+	require_moonraker_connect 
+	_get "/access/info" | jq '.result'
+}
+
+access.users(){
+	require_moonraker_connect 
+	_get "/access/users/list" | jq '.result'
 }
 
 _debug "Arguments: $# - $*"

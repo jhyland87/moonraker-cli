@@ -10,6 +10,7 @@ __module_path=$(realpath "${BASH_SOURCE[0]}") # /absolute/path/to/module/example
 __module_dir=$(dirname "${__module_path}") # /absolute/path/to/module
 __module_file=$(basename ${__module_path}) # example.sh
 __module_name=${__module_file%%.sh} # example
+__moonraker_base_dir=$(realpath "${__module_dir}/../")
 # echo ${__module_name^^} # EXAMPLE
 
 
@@ -50,7 +51,7 @@ status.fans(){
 
 	if [[ -f ${sourcefile} ]]; then
 		jq --monochrome-output \
-			--from-file ./jq/filters/server.temperature_store__component__datapoint.jq \
+			--from-file ${__moonraker_base_dir}/jq/filters/server.temperature_store__component__datapoint.jq \
 			--arg limit 75 \
 			--arg component "temperature_fan chamber_fan" \
 	 		--arg datapoint temperatures \
@@ -60,7 +61,7 @@ status.fans(){
 		
 	curl --silent 'http://192.168.0.96:7125/server/temperature_store' | \
 		jq --monochrome-output \
-			--from-file ./jq/filters/server.temperature_store__component__datapoint.jq \
+			--from-file ${__moonraker_base_dir}/jq/filters/server.temperature_store__component__datapoint.jq \
 			--arg limit 75 \
 			--arg component "temperature_fan chamber_fan" \
 			--arg datapoint temperatures | 
@@ -87,7 +88,7 @@ status.extruder(){
 
 	if [[ -f ${sourcefile} ]]; then
 		jq --monochrome-output \
-			--from-file ./jq/filters/server.temperature_store__component__datapoint.jq \
+			--from-file ${__moonraker_base_dir}/jq/filters/server.temperature_store__component__datapoint.jq \
 			--arg limit 75 \
 	 		--arg component extruder \
 	 		--arg datapoint temperatures \
@@ -97,7 +98,7 @@ status.extruder(){
 		
 		curl --silent 'http://192.168.0.96:7125/server/temperature_store' | \
 			jq --monochrome-output \
-				--from-file ./jq/filters/server.temperature_store__component__datapoint.jq \
+				--from-file ${__moonraker_base_dir}/jq/filters/server.temperature_store__component__datapoint.jq \
 				--arg limit 75 \
 				--arg component extruder \
 				--arg datapoint temperatures | 
@@ -121,7 +122,7 @@ status.hotbed(){
 
 	if [[ -f ${sourcefile} ]]; then
 		jq --monochrome-output \
-			--from-file ./jq/filters/server.temperature_store__component__datapoint.jq \
+			--from-file ${__moonraker_base_dir}/jq/filters/server.temperature_store__component__datapoint.jq \
 			--arg limit 75 \
 	 		--arg component heater_bed \
 	 		--arg datapoint temperatures \
@@ -131,7 +132,7 @@ status.hotbed(){
 		
 	curl --silent 'http://192.168.0.96:7125/server/temperature_store' | \
 		jq --monochrome-output \
-			--from-file ./jq/filters/server.temperature_store__component__datapoint.jq \
+			--from-file ${__moonraker_base_dir}/jq/filters/server.temperature_store__component__datapoint.jq \
 			--arg limit 75 \
 	 		--arg component heater_bed \
 	 		--arg datapoint temperatures | 
@@ -164,7 +165,7 @@ status.mcutemp(){
 
 	if [[ -f ${sourcefile} ]]; then
 		jq --monochrome-output \
-			--from-file ./jq/filters/server.temperature_store__component__datapoint.jq \
+			--from-file ${__moonraker_base_dir}/jq/filters/server.temperature_store__component__datapoint.jq \
 			--arg limit 75 \
 		 	--arg component 'temperature_sensor chamber_temp' \
 	 		--arg datapoint temperatures \
@@ -174,7 +175,7 @@ status.mcutemp(){
 		
 	curl --silent 'http://192.168.0.96:7125/server/temperature_store' | \
 		jq --monochrome-output \
-			--from-file ./jq/filters/server.temperature_store__component__datapoint.jq \
+			--from-file ${__moonraker_base_dir}/jq/filters/server.temperature_store__component__datapoint.jq \
 			--arg limit 75 \
 	 		--arg component 'temperature_sensor mcu_temp' \
 	 		--arg datapoint temperatures | 
@@ -197,7 +198,7 @@ status.chambertemp(){
 
 	if [[ -f ${sourcefile} ]]; then
 		jq --monochrome-output \
-			--from-file ./jq/filters/server.temperature_store__component__datapoint.jq \
+			--from-file ${__moonraker_base_dir}/jq/filters/server.temperature_store__component__datapoint.jq \
 			--arg limit 75 \
 		 	--arg component 'temperature_sensor chamber_temp' \
 	 		--arg datapoint temperatures \
@@ -206,7 +207,7 @@ status.chambertemp(){
 	else
 		curl --silent 'http://192.168.0.96:7125/server/temperature_store' | \
 			jq --monochrome-output \
-				--from-file ./jq/filters/server.temperature_store__component__datapoint.jq \
+				--from-file ${__moonraker_base_dir}/jq/filters/server.temperature_store__component__datapoint.jq \
 				--arg limit 75 \
 		 		--arg component 'temperature_sensor chamber_temp' \
 		 		--arg datapoint temperatures | 
@@ -228,7 +229,7 @@ status.chamberfan(){
 
 	if [[ -f ${sourcefile} ]]; then
 		jq --monochrome-output \
-			--from-file ./jq/filters/server.temperature_store__component__datapoint.jq \
+			--from-file ${__moonraker_base_dir}/jq/filters/server.temperature_store__component__datapoint.jq \
 			--arg limit 75 \
 	 		--arg component 'temperature_fan chamber_fan' \
 	 		--arg datapoint temperatures \
@@ -237,7 +238,7 @@ status.chamberfan(){
 	else
 		curl --silent 'http://192.168.0.96:7125/server/temperature_store' | \
 			jq --monochrome-output \
-				--from-file ./jq/filters/server.temperature_store__component__datapoint.jq \
+				--from-file ${__moonraker_base_dir}/jq/filters/server.temperature_store__component__datapoint.jq \
 				--arg limit 75 \
 		 		--arg component 'temperature_fan chamber_fan' \
 		 		--arg datapoint temperatures | 
@@ -268,7 +269,7 @@ status.chamberfanspeed(){
 
 	if [[ -f ${sourcefile} ]]; then
 		jq --monochrome-output \
-			--from-file ./jq/filters/server.temperature_store__component__datapoint.jq \
+			--from-file ${__moonraker_base_dir}/jq/filters/server.temperature_store__component__datapoint.jq \
 			--arg limit 75 \
 	 		--arg component 'temperature_fan chamber_fan' \
 	 		--arg datapoint speeds \
@@ -277,7 +278,7 @@ status.chamberfanspeed(){
 	else
 		curl --silent 'http://192.168.0.96:7125/server/temperature_store' | \
 			jq --monochrome-output \
-				--from-file ./jq/filters/server.temperature_store__component__datapoint.jq \
+				--from-file ${__moonraker_base_dir}/jq/filters/server.temperature_store__component__datapoint.jq \
 				--arg limit 75 \
 		 		--arg component 'temperature_fan chamber_fan' \
 		 		--arg datapoint speeds | 

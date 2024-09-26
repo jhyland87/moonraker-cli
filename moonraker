@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-
 tabs -2
 
 #set -o errtrace
@@ -12,7 +11,7 @@ declare -rgx CLI_PID=$$
 
 # Simple constants - readonly integer values
 declare -irx CONST_LOGLVL_NONE=0 CONST_LOGLVL_ERROR=1 CONST_LOGLVL_WARN=2 \
-						 CONST_LOGLVL_INFO=3 CONST_LOGLVL_DEBUG=4
+			 CONST_LOGLVL_INFO=3 CONST_LOGLVL_DEBUG=4
 
 source ${CLI_DIR}/includes/colors.sh
 source ${CLI_DIR}/includes/logging.sh
@@ -28,8 +27,8 @@ source ${CLI_DIR}/includes/connect.sh
 declare -igx LOG_LEVEL=${LOG_LEVEL:=1} MOONRAKER_TIMEOUT
 
 # Readonly string values
-declare -rx 	MOONRAKER_HOST MOONRAKER_PORT MOONRAKER_PROTO \
-							LOG_FORMAT=${LOG_FORMAT:-'%21s| %8s: %s\n'}
+declare -rx MOONRAKER_HOST MOONRAKER_PORT MOONRAKER_PROTO \
+			LOG_FORMAT=${LOG_FORMAT:-'%21s| %8s: %s\n'}
 
 
 [[ ! ${MOONRAKER_HOST} ]] && _error "No MOONRAKER_HOST defined - please define this in the settings file" 1
@@ -86,15 +85,22 @@ _post() {
 	fi
 }
 
+
 declare -A command_aliases
+
+execcmd="${1:-help}"
 
 if [[ -e ./config/aliases.cfg ]]; then
 	while read line; do
-		_alias=$(echo "${line}" | cut -d'=' -f1)
-		_cmd=$(echo "${line}" | cut -d'=' -f2)
+		_alias=$(echo "${line}" | cut -d '=' -f 1)
+		_cmd=$(echo "${line}" | cut -d '=' -f 2- | tr -d '"')
+		# _cmd=$(echo "${line}" | cut -d '=' -f 2 | tr -d '"')
+		# _subcmd=$(echo "${line}" | cut -d '=' -f 3 | tr -d '"')
+		# _params=$(echo "${line}" | cut -d '=' -f 3- | tr -d '"')
+		
 		command_aliases[$_alias]=$_cmd
 		_debug "Added alias $_alias for $_cmd"
-	done <<< $(grep -EO '^[a-z]+=[a-z]+$'  ./config/aliases.cfg)
+	done <<< $(grep -EO '^[a-z]+="?[a-z ]+"?$' ./config/aliases.cfg)
 fi
 
 export -f _error _warn _info _debug  _ts
@@ -107,16 +113,22 @@ _debug "INPUT is: $*"
 
 test -f ${TMP_DIR} || mkdir ${TMP_DIR} &>/dev/null
 
-execcmd="${1:-help}"
+# Check for an alias if there is one.
+if [[ ${command_aliases[${execcmd}]} ]]; then
+	_debug "Found '$execcmd' in aliases - Value: " ${command_aliases["${execcmd}"]}
+	alias_cmd=${command_aliases[${execcmd}]}
+	cmd=$(echo "${alias_cmd}" | awk '{print $1}')
+	params=$(echo "${alias_cmd}" | cut -d ' ' -f 2-)
+	
+	# Moify the CLI params, switching the out with the new ones.
+	set -- "${@:2}" "${cmd}" "${@:4}" ${params}
 
-test ${command_aliases[${execcmd}]} && execcmd=${command_aliases[${execcmd}]}
+	execcmd="${cmd}"
+fi
 
 shift
-
-
 
 test -f "${CLI_DIR}/commands/${execcmd}.sh" || _error "No subcommand found for ${execcmd}" 1
 
 #export -p 
 eval ${CLI_DIR}/commands/${execcmd}.sh ${*@Q}
-

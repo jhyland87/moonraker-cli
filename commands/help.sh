@@ -11,6 +11,10 @@ __module_path=$(realpath "${BASH_SOURCE[0]}") # /absolute/path/to/module/file.sh
 __module_dir=$(dirname "${__module_path}") # /absolute/path/to/module
 __module_file=$(basename ${__module_path}) # file.sh
 __module_name=${__module_file%%.sh} # file
+__moonraker_base_dir=$(realpath "${__module_dir}/../")
+
+_commands_dir="${__moonraker_base_dir}/commands"
+
 
 help.description(){
 	# DESCRIPTION: Description of this command
@@ -31,7 +35,7 @@ subcmd=${1:-help}
 [[ $subcmd == 'help' ]] && eval ${__module_name}.help && exit
 
 listcommands(){
-	ls -1 commands | sed -E 's/\.sh$//g' | grep -v example
+	ls -1 ${_commands_dir} | sed -E 's/\.sh$//g' | grep -v example
 }
 
 help.commands(){
@@ -39,7 +43,7 @@ help.commands(){
 	#_h1 "available cmds:"
 	listcommands | while read cmd; do
 		printf "    %b%-10s%b\t" "${_command_}" "${cmd}" "${_none_}"
-		bash ./commands/$cmd.sh description
+		bash ${_commands_dir}/$cmd.sh description
 	done
 
 	echo

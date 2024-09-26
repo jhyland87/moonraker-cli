@@ -46,6 +46,7 @@ bed.mesh(){
 	require_moonraker_connect 
 
 	_get /printer/objects/query 'bed_mesh' > "${TMP_DIR}/bed_mesh.tmp.json"
+	
 	mesh_min=$(jq '.result.status.bed_mesh.mesh_matrix | flatten(1) | min' "${TMP_DIR}/bed_mesh.tmp.json")
 	mesh_max=$(jq '.result.status.bed_mesh.mesh_matrix | flatten(1) | max' "${TMP_DIR}/bed_mesh.tmp.json")
 	echo "Mesh min: ${mesh_min}"

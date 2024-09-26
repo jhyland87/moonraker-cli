@@ -13,6 +13,7 @@ __module_path=$(realpath "${BASH_SOURCE[0]}") # /absolute/path/to/module/file.sh
 __module_dir=$(dirname "${__module_path}") # /absolute/path/to/module
 __module_file=$(basename ${__module_path}) # file.sh
 __module_name=${__module_file%%.sh} # file
+__moonraker_base_dir=$(realpath "${__module_dir}/../")
 
 
 history.description(){

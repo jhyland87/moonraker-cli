@@ -10,6 +10,7 @@ __module_path=$(realpath "${BASH_SOURCE[0]}") # /absolute/path/to/module/webcam.
 __module_dir=$(dirname "${__module_path}") # /absolute/path/to/module
 __module_file=$(basename ${__module_path}) # webcam.sh
 __module_name=${__module_file%%.sh} # example
+__moonraker_base_dir=$(realpath "${__module_dir}/../")
 # echo ${__module_name^^} # EXAMPLE
 
 webcam.description(){
