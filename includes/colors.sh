@@ -57,6 +57,9 @@ _nounderline_="\e[24m"
 _ul_="\e[4m"
 _ulx_="\e[24m"
 
+_ulital_="\e[4;3m"
+_ulitalx_="\e[24;23m"
+
 _overline_="\e[53m"
 _nooverline_="\e[55m"
 

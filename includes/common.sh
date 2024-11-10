@@ -302,3 +302,23 @@ json2table(){
 			--arg output tsv | 
 		column -ts $'\t'
 }
+
+_greater_than(){
+	test $(echo "${1?No value specified to compare against} > ${2?No comparitor specified}" | bc -l) == 1
+}
+
+_less_than(){
+	test $(echo "${1?No value specified to compare against} < ${2?No comparitor specified}" | bc -l) == 1
+}
+
+_get_percent(){
+	if _greater_than $1 $2; then
+		a=$1
+		b=$2
+	else
+		a=$2
+		b=$1
+	fi
+	result=$(echo "scale=1;(${b}/${a})*100" |bc -l)
+	echo "${result}%"
+}

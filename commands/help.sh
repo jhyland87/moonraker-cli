@@ -22,21 +22,52 @@ help.description(){
 	#exit
 }
 
+listcommands(){
+	# ls -1 ${_commands_dir} | sed -E 's/\.sh$//g' | grep -v example | while read cmd; do
+	# 	echo -ne "\e[1mmoonraker \e[3m$cmd\e[0m\n\t" >&1
+	# 	#echo
+	# 	desc=$(moonraker $cmd description 2>&1)
+	# 	echo "DESC: $desc" 
+	# 	echo
+		
+	# 	#printf "%-10s: %s\n" "TESTERRR" "${cmd_output}"
+	
+	# done
+
+	ls -1 ${_commands_dir} | sed -E 's/\.sh$//g' | grep -v example
+
+	# find commands -maxdepth 1 -type f -name '*.sh' -not -name help.sh -execdir echo '{}' ';' | sed -e 's/\.sh//g'
+	#find commands -maxdepth 1 -type f -name '*.sh' -not -name help.sh -execdir echo '{}' ';' | sed -e 's/\.sh$//g' | sort
+
+}
 
 help.help(){
 	echo -e "${_helphead_}${__module_name^^} COMMANDS${_none_}"
 	echo
-	echo -e "Not much..."
+	echo -e "Help for moonraker-cli"
 	echo
+	echo -e "Help commands:"
+	echo -e "  ${_egdesc_}List available commands${_none_}"
+	echo -e "  ${_prompt_}\$${_none_} ${_egcmd_}moonraker help ${_ital_}commands${_italx_}${_none_}"
+	#echo -e "  ${_egres_}# List of contents in directory${_none_}"
+	echo
+	echo -e "For help on a specific command, ${_ital_}type moonraker <command> help${_italx_}:"
+	echo -e "  ${_prompt_}\$${_none_} ${_egcmd_}moonraker ${_ulital_}file${_ulitalx_} help${_none_}"
+	echo -e "  ${_egres_}# Will show the help menu for the ${_ital_}files${_italx_} command${_none_}"
+	echo
+
+
+
+	#echo
+	#echo -e "Not much..."
+	#moonraker help commands
 }
 
 subcmd=${1:-help}
 [[ $subcmd == 'description' ]] && eval ${__module_name}.description && exit
 [[ $subcmd == 'help' ]] && eval ${__module_name}.help && exit
 
-listcommands(){
-	ls -1 ${_commands_dir} | sed -E 's/\.sh$//g' | grep -v example
-}
+
 
 help.commands(){
 	echo "Available commands:" | tr '[:lower:]' '[:upper:]'
