@@ -45,21 +45,26 @@ show_printer_state() {
 bed.mesh(){
 	require_moonraker_connect 
 
-	_get /printer/objects/query 'bed_mesh' > "${TMP_DIR}/bed_mesh.tmp.json"
-	
-	mesh_min=$(jq '.result.status.bed_mesh.mesh_matrix | flatten(1) | min' "${TMP_DIR}/bed_mesh.tmp.json")
-	mesh_max=$(jq '.result.status.bed_mesh.mesh_matrix | flatten(1) | max' "${TMP_DIR}/bed_mesh.tmp.json")
-	echo "Mesh min: ${mesh_min}"
-	echo "Mesh max: ${mesh_max}"
+	#_get /printer/objects/query 'bed_mesh' | jq --monochrome-output > "${TMP_DIR}/bed_mesh.tmp.json"
 
-	# curl --silent https://raw.githubusercontent.com/sgreben/jp/master/examples/mvrnorm.json| jp -xy '..[x,y]' -type hist2d -canvas full-bw -height 33 -width 66
+	printFormat="${_none_}${_dim_}%15s:${_nodim_} ${_bold_}%s${_nbold_}\n"
+	meshProfile=$(jq '.result.status.bed_mesh.profile_name' --raw-output "${TMP_DIR}/bed_mesh.tmp.json")
+
+	printf "${printFormat}" "Mesh Profile" "${meshProfile}"
+	printf "${printFormat}" "Mesh min" $(jq --arg profile "${meshProfile}" '.result.status.bed_mesh.profiles[$profile].mesh_params | [.min_x,.min_y] | join("/")' --raw-output "${TMP_DIR}/bed_mesh.tmp.json")
+	printf "${printFormat}" "Mesh max" $(jq --arg profile "${meshProfile}" '.result.status.bed_mesh.profiles[$profile].mesh_params | [.max_x,.max_y] | join("/")' --raw-output "${TMP_DIR}/bed_mesh.tmp.json")
+	printf "${printFormat}" "Probed matrix" $(jq --arg profile "${meshProfile}" '.result.status.bed_mesh.profiles[$profile].mesh_params | [.x_count,.y_count] | join("/")' --raw-output "${TMP_DIR}/bed_mesh.tmp.json")
+	printf "${printFormat}" "Mesh matrix" $(jq '.result.status.bed_mesh.mesh_matrix |  length as $x | .[0] | length as $y| [$x,$y] | join("x")' --raw-output "${TMP_DIR}/bed_mesh.tmp.json")
+	printf "${printFormat}" "Algorythm" $(jq --arg profile "${meshProfile}" '.result.status.bed_mesh.profiles[$profile].mesh_params.algo' --raw-output "${TMP_DIR}/bed_mesh.tmp.json")
+	
+	jq --raw-output '.result.status.bed_mesh.mesh_matrix | reverse | .[] | @csv' "${TMP_DIR}/bed_mesh.tmp.json" | ./includes/awk/hotbed_mesh_map.awk
 }
 
 _debug "Arguments: $# - $*"
 
-for p in "$@"; do
-	echo "${p}"
-done
+# for p in "$@"; do
+# 	echo "${p}"
+# done
 
 subcmd="${1:-help}"
 

@@ -3,7 +3,7 @@
 #
 # USAGE:
 #
-# EXAMPLE:
+# EXAMPLES:
 #   jq --null-input \
 #       --arg method server.gcode_store \
 #       --arg id $RANDOM \
@@ -17,7 +17,7 @@
 #       --arg foo.bar.baz "Should be at foo.bar.baz" \
 #       --from-file ./jq/modifiers/args2json.jq
 #
-# Returns:
+#   Returns:
 #     {
 #       "jsonrpc": "2.0",
 #       "id": 22623,
@@ -46,6 +46,24 @@
 #         }
 #       }
 #     }
+#
+#
+#   jq --null-input --compact-output --raw-output \
+#   	--arg method "server.temperature_store" \
+#   	--arg id $RANDOM \
+#   	--arg include_monitors false \
+#   	--from-file ./jq/modifiers/args2json.jq |
+#   	websocat ws://192.168.0.96:7125/websocket | 
+#   	jq
+#
+#   jq --null-input --compact-output --raw-output \
+#   	--arg method "server.gcode_store" \
+#   	--arg id $RANDOM \
+#   	--arg count 2 \
+#   	--from-file ./jq/modifiers/args2json.jq |
+#   	websocat ws://192.168.0.96:7125/websocket | 
+#   	jq 
+# 
 
 # Cast some text into the most likely value and appropriate data type
 def cast_arg:

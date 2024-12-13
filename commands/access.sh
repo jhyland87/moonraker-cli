@@ -49,8 +49,8 @@ access.apikey(){
 access.refreshjwt(){
 	require_moonraker_connect 
 	[[ ! -f ~/.moonraker-auth ]] && echo "No auth file found at ~/.moonraker-auth" 1>&2 && return 1
-	local refresh_token=$()
-	_post "/access/refresh_jwt" "refresh_token=" | jq '.result'
+	local refresh_token=$(jq '.result.refresh_token' ~/.moonraker-auth -r)
+	_post "/access/refresh_jwt" "refresh_token=${refresh_token}" | jq '.result'
 }
 
 access.login(){

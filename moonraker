@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
 
-tabs -2
-
+#tabs -2
+#set -x
 #set -o errtrace
 #set -o functrace
 
-declare -rgx CLI_DIR=$(dirname $(realpath $0))
+#cd `dirname -- "${BASH_SOURCE[0]}"`
+declare -rgx CLI_DIR=$(readlink -f $(dirname $(realpath $0)))
 declare -rgx CLI_NAME=$(basename $0)
 declare -rgx CLI_PID=$$
+cd "${CLI_DIR}"
+
 
 # Simple constants - readonly integer values
 declare -irx CONST_LOGLVL_NONE=0 CONST_LOGLVL_ERROR=1 CONST_LOGLVL_WARN=2 \
