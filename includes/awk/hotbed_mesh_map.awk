@@ -36,10 +36,10 @@ BEGIN {
 
     # While iterating over the columns for this line, well also inject the new averaged values for the new columns and rows.
     for ( col_idx = 1; col_idx <= COL_COUNT; col_idx++ ){
-        sd_count++
-        sd_sumofmesh+=$col_idx
-        #sd_sumofsquares+=($col_idx*sd_count)-(sd_count*sd_count)
-        sd_all_values[sd_count-1]=$col_idx
+        #sd_count++
+        #sd_sumofmesh+=$col_idx
+        ##sd_sumofsquares+=($col_idx*sd_count)-(sd_count*sd_count)
+        #sd_all_values[sd_count-1]=$col_idx
 
         # Saving the highest and lowest mesh values so we know how to scale the colors
         if ( length(min_value) == 0 || $col_idx < min_value ) 
@@ -77,18 +77,18 @@ BEGIN {
     }
 }
 END {
-    sd_mean=sd_sumofmesh/sd_count
-    sd_variance=sd_sumofmesh/(sd_count-1)
+    # sd_mean=sd_sumofmesh/sd_count
+    # sd_variance=sd_sumofmesh/(sd_count-1)
 
-    for ( v in sd_all_values ){
-        s=sd_all_values[v]-sd_mean
-        sq=s*s
-        sd_sumofsquares+=s*s
-    }
+    # for ( v in sd_all_values ){
+    #     s=sd_all_values[v]-sd_mean
+    #     sq=s*s;
+    #     sd_sumofsquares+=s*s
+    # }
 
-    sd_variance=(sd_sumofsquares/(sd_count-1))
-    sd_value=sqrt(sd_variance)
-    print sd_value
+    # sd_variance=(sd_sumofsquares/(sd_count-1))
+    # sd_value=sqrt(sd_variance)
+    # print sd_value
 
 
     positive_gradient_scale_spacing = max_value/(ROW_COUNT-1);

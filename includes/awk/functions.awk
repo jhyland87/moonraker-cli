@@ -118,8 +118,50 @@ function get_new_idx(id){
     return id*2-1;
 }
 
+# function round(x, ival, aval, fraction){
+#    ival = int(x)    # integer part, int() truncates
 
+#    # see if fractional part
+#    if (ival == x)   # no fraction
+#       return ival   # ensure no decimals
+
+#    if (x < 0) {
+#       aval = -x     # absolute value
+#       ival = int(aval)
+#       fraction = aval - ival
+#       if (fraction >= .5)
+#          return int(x) - 1   # -2.5 --> -3
+#       else
+#          return int(x)       # -2.3 --> -2
+#    } else {
+#       fraction = x - ival
+#       if (fraction >= .5)
+#          return ival + 1
+#       else
+#          return ival
+#    }
+# }
+
+function round(num){
+    return sprintf( "%.f", int(num+0.5));
+}
+
+# Get the absolute value (positive value) of a number.
+# abs(123)  = 123
+# abs(-123) = 123
 function abs(num){
     if ( num < 0) return -num
     return num
 }
+
+# 𝑥ᵢ-𝑥
+# 𝑛
+# ﹦
+# ∑
+# ⅀
+# 𝜎 = sample
+# 𝜇 = population
+#     ＿＿＿＿＿＿＿＿
+#    ／ 𝑛
+# 𝜇=√ ∑ (𝑥𝑖−𝜇)²
+#     𝑖=1
