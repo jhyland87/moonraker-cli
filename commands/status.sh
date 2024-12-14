@@ -408,16 +408,16 @@ status.temps(){
 	term_cols=$((`tput cols`-5))
 	term_lines=$((`tput lines`/5-3))
 
-	curl --silent 'http://192.168.0.96:7125/server/temperature_store' > temperature_store.json 
-	status.extruder $term_cols $term_lines temperature_store.json
+	curl --silent 'http://192.168.0.96:7125/server/temperature_store' > "${TMP_DIR}/temperature_store.json"
+	status.extruder $term_cols $term_lines "${TMP_DIR}/temperature_store.json"
 	_hr
-	status.hotbed $term_cols $term_lines temperature_store.json
+	status.hotbed $term_cols $term_lines "${TMP_DIR}/temperature_store.json"
 	_hr
-	status.mcutemp $term_cols $term_lines temperature_store.json
+	status.mcutemp $term_cols $term_lines "${TMP_DIR}/temperature_store.json"
 	_hr
-	status.chambertemp $term_cols $term_lines temperature_store.json
+	status.chambertemp $term_cols $term_lines "${TMP_DIR}/temperature_store.json"
 	_hr
-	status.chamberfan $term_cols $term_lines #temperature_store.json
+	status.chamberfan $term_cols $term_lines #"${TMP_DIR}/temperature_store.json"
 }
 
 

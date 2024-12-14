@@ -41,7 +41,7 @@ function trim_gradient(value, char_len){
 function pos_mesh_val_to_color(mesh_val){
     color_span = (length(positive_colors)-1)/max_value;
 
-    if ( mesh_val > max_value ) 
+    if ( mesh_val > max_value )
         mesh_val = max_value;
 
     idx = int(mesh_val * color_span);

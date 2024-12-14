@@ -45,7 +45,7 @@ show_printer_state() {
 bed.mesh(){
 	require_moonraker_connect 
 
-	#_get /printer/objects/query 'bed_mesh' | jq --monochrome-output > "${TMP_DIR}/bed_mesh.tmp.json"
+	_get /printer/objects/query 'bed_mesh' | jq --monochrome-output > "${TMP_DIR}/bed_mesh.tmp.json"
 
 	printFormat="${_none_}${_dim_}%15s:${_nodim_} ${_bold_}%s${_nbold_}\n"
 	meshProfile=$(jq '.result.status.bed_mesh.profile_name' --raw-output "${TMP_DIR}/bed_mesh.tmp.json")
