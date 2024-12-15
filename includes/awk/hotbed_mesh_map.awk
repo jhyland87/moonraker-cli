@@ -84,7 +84,7 @@ END {
     #                 1  1  1
     #  1  2  3 ... 9  0  1  2 ...
     if ( length(COL_COUNT) > 1 ){
-        printf("%s", go2col(grid_start_indent));
+        go2col(grid_start_indent);
         for ( i = 0; i<=(COL_COUNT-1); i++){
             col_num = i;
             if ( length(col_num) > 1 ){
@@ -99,7 +99,7 @@ END {
     }
 
     # Print second row in X axis coordinate rows, if any double digit cols are found
-    printf("%s", go2col(grid_start_indent));
+    go2col(grid_start_indent);
 
     for ( i = 0; i<=(COL_COUNT-1); i++){
         col_num = i;
@@ -121,7 +121,7 @@ END {
             # Print the Y axis coordinates on the first row then every other row after that.
             if ( col == 1 && (row %2 == 0 || row == length(results)) ){
                 printf("%s%2s\033[0m", colors["xy"], to_superset(row_idx_display));
-                printf("%s", go2col(grid_start_indent));
+                go2col(grid_start_indent);
                 row_idx_display++;
             }
 
@@ -141,44 +141,68 @@ END {
         }
         
         # Logic to show the Y coordinates and arrows
-        if ( row == coordinates_y_top )
+        if ( row == coordinates_y_top ){
             printf("%s%2s\033[0m", colors["coordinates"], coordinates["up"]);
-        else if ( row == coordinates_y_center )
+        }
+        else if ( row == coordinates_y_center ){
             printf("%s%2s\033[0m", colors["coordinates"], coordinates["Y"]);
-        else if ( row == coordinates_y_bottom )
+        }
+        else if ( row == coordinates_y_bottom ) {
             printf("%s%2s\033[0m", colors["coordinates"], coordinates["down"]);
-        
+        }
+                
         if ( row % 2 == 0  ) {
             top_color = mesh_val_to_color(gradient_scale_cursor);
             top_val = gradient_scale_cursor;
 
-            if ( gradient_scale_cursor >= 0 )
+            if ( gradient_scale_cursor > 0 ){
                 gradient_scale_cursor = gradient_scale_cursor - positive_gradient_scale_spacing;
-            else 
+            }
+            else {
                 gradient_scale_cursor = gradient_scale_cursor + negative_gradient_scale_spacing;
-            
+            }
+
             bottom_color = mesh_val_to_color(gradient_scale_cursor);
             bottom_val = gradient_scale_cursor;
 
-            if ( gradient_scale_cursor >= 0 )
+            # If the gs cursor is between 0 and positive_gradient_scale_spacing (minimum positive value), then just
+            # set it to zero so we can have a neutral point on the graph
+            if ( gradient_scale_cursor >= 0 && gradient_scale_cursor <= positive_gradient_scale_spacing ){
+                gradient_scale_cursor = 0;
+            }
+            # If the gs cursor is between 0 and negative_gradient_scale_spacing, then set it to negative_gradient_scale_spacing
+            else if ( gradient_scale_cursor < 0 && gradient_scale_cursor >= negative_gradient_scale_spacing ){
+                gradient_scale_cursor = negative_gradient_scale_spacing
+            }
+            # I the cursor is a positive value, then remove one positive gradient level 
+            else if ( gradient_scale_cursor > 0 ){
                 gradient_scale_cursor = gradient_scale_cursor - positive_gradient_scale_spacing;
-            else 
+            }
+            # I the cursor is a negative value, then add one negative gradient level 
+            else {
                 gradient_scale_cursor = gradient_scale_cursor + negative_gradient_scale_spacing;
- 
-            # ˡᵒʷ
-            # ʰⁱᵍʰ
+            }
 
-            if ( row_idx_display == 1 )
-                printf("\t\033[38;2;%s;48;2;%sm%s%s\033[0m %s\n", bottom_color, top_color, block["lower"], block["lower"], to_superset(trim_gradient(top_val)));
-            else 
-                printf("\t\033[38;2;%s;48;2;%sm%s%s\033[0m %s\n", bottom_color, top_color, block["lower"], block["lower"], to_superset(trim_gradient(top_val)));
-
+            go2col(32);
+            if ( row_idx_display == 1 ){
+                printf("\033[38;2;%s;48;2;%sm%s%s\033[0m %s\n", bottom_color, top_color, block["lower"], block["lower"], to_superset(trim_gradient(top_val)));
+            }
+            else {
+                if ( top_val == 0 ){
+                    printf("\033[38;2;%s;48;2;%sm%s%s\033[0m %s %s%s\n", bottom_color, top_color, block["lower"], block["lower"], to_superset(trim_gradient(top_val)), colors["xy"], to_superset("mm"));
+                }
+                else {
+                    printf("\033[38;2;%s;48;2;%sm%s%s\033[0m %s\n", bottom_color, top_color, block["lower"], block["lower"], to_superset(trim_gradient(top_val)));
+                }
+            }
         }
         else if (row == length(results)) {
-            printf("\t\033[38;2;%sm%s%s\033[0m %s\n", mesh_val_to_color(results[row][col]),  block["upper"], block["upper"],  to_superset(trim_gradient(min_value)));
+            go2col(32);
+            printf("\033[38;2;%sm%s%s\033[0m %s\n", mesh_val_to_color(results[row][col]),  block["upper"], block["upper"],  to_superset(trim_gradient(min_value)));
         }
     }
 
     # Logic to show the X coordinates and arrows
-    printf("%s%s%-3s %s %3s%s\n", go2col(10), colors["coordinates"], coordinates["left"], coordinates["X"], coordinates["right"], "\033[0m");   
+    go2col(10);
+    printf("%s%-3s %s %3s%s\n", colors["coordinates"], coordinates["left"], coordinates["X"], coordinates["right"], "\033[0m");   
 }

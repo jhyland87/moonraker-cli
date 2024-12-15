@@ -15,7 +15,8 @@ function bg(color){
 
 # Function to send the cursor to a specific location of the current line.
 function go2col(col) {
-    printf("\033[100D\033[%sC", col);
+    char = sprintf("\033[100D\033[%sC", col);
+    printf("%s", char);
     #echo -en "\033[100D\033[${1:-0}C"
 }
 
