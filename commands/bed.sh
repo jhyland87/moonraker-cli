@@ -47,17 +47,40 @@ bed.mesh(){
 
 	_get /printer/objects/query 'bed_mesh' | jq --monochrome-output > "${TMP_DIR}/bed_mesh.tmp.json"
 
-	printFormat="${_none_}${_dim_}%15s:${_nodim_} ${_bold_}%s${_nbold_}\n"
-	meshProfile=$(jq '.result.status.bed_mesh.profile_name' --raw-output "${TMP_DIR}/bed_mesh.tmp.json")
-	standardDeviation=$(jq --raw-output '.result.status.bed_mesh.mesh_matrix | reverse | .[] | @csv' "${TMP_DIR}/bed_mesh.tmp.json"  | ./includes/awk/standard-deviation.awk )
+	read -r mesh_profile mesh_min mesh_max probed_matrix algorythm range mesh_matrix std_deviation variance <<< $(jq \
+		'include "./jq/utils"; 
+        (.result.status.bed_mesh.profile_name) as $profile |
+        (.result.status.bed_mesh.profiles[$profile].mesh_params | [
+			([float_to_int(.min_x), float_to_int(.min_y)] | join("/")), 
+			([float_to_int(.max_x), float_to_int(.max_y)] | join("/")),
+			([.x_count,.y_count] | join("x")),
+			.algo
+		]) as $mesh_params 
+		| (.result.status.bed_mesh.mesh_matrix | [
+			([.[][]] | sort_by(.) | .[-1]+(-.[0]) | trim_num(7)),
+			(length as $x | .[0] | length as $y| [$x,$y] | join("x")),
+            ([.[][]] | calc_std_deviation(true)),
+            ([.[][]] | calc_variance(true))
+		]) as $matrix_params 
+		| [$profile, $mesh_params[], $matrix_params[]] | join(" ")' \
+		--raw-output "${TMP_DIR}/bed_mesh.tmp.json")
+	
+	if [[ $? -ne 0 ]]; then
+		_error "Failed to parse bed mesh response with jq"
+		exit 1 
+	fi
 
-	printf "${printFormat}" "Mesh Profile" "${meshProfile}"
-	printf "${printFormat}" "Mesh min" $(jq --arg profile "${meshProfile}" '.result.status.bed_mesh.profiles[$profile].mesh_params | [.min_x,.min_y] | join("/")' --raw-output "${TMP_DIR}/bed_mesh.tmp.json")
-	printf "${printFormat}" "Mesh max" $(jq --arg profile "${meshProfile}" '.result.status.bed_mesh.profiles[$profile].mesh_params | [.max_x,.max_y] | join("/")' --raw-output "${TMP_DIR}/bed_mesh.tmp.json")
-	printf "${printFormat}" "Probed matrix" $(jq --arg profile "${meshProfile}" '.result.status.bed_mesh.profiles[$profile].mesh_params | [.x_count,.y_count] | join("/")' --raw-output "${TMP_DIR}/bed_mesh.tmp.json")
-	printf "${printFormat}" "Mesh matrix" $(jq '.result.status.bed_mesh.mesh_matrix |  length as $x | .[0] | length as $y| [$x,$y] | join("x")' --raw-output "${TMP_DIR}/bed_mesh.tmp.json")
-	printf "${printFormat}" "Algorythm" $(jq --arg profile "${meshProfile}" '.result.status.bed_mesh.profiles[$profile].mesh_params.algo' --raw-output "${TMP_DIR}/bed_mesh.tmp.json")
-	printf "${printFormat}" "Std. Deviation" "${standardDeviation}"
+	printFormat="${_none_}${_dim_}%15s:${_nodim_} ${_bold_}%s${_nbold_}\n"
+
+	printf "${printFormat}" "Mesh Profile" "${mesh_profile}"
+	printf "${printFormat}" "Mesh min" "${mesh_min}"
+	printf "${printFormat}" "Mesh max" "${mesh_max}"
+	printf "${printFormat}" "Probed matrix" "${probed_matrix}"
+	printf "${printFormat}" "Mesh matrix" "${mesh_matrix}"
+	printf "${printFormat}" "Algorythm" "${algorythm}"
+	printf "${printFormat}" "Range" "${range}"
+	printf "${printFormat}" "Std. Deviation" "${std_deviation}"
+	printf "${printFormat}" "Variance" "${variance}"
 
 	jq --raw-output '.result.status.bed_mesh.mesh_matrix | reverse | .[] | @csv' "${TMP_DIR}/bed_mesh.tmp.json" | ./includes/awk/hotbed_mesh_map.awk
 }

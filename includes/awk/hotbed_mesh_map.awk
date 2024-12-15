@@ -36,11 +36,6 @@ BEGIN {
 
     # While iterating over the columns for this line, well also inject the new averaged values for the new columns and rows.
     for ( col_idx = 1; col_idx <= COL_COUNT; col_idx++ ){
-        #sd_count++
-        #sd_sumofmesh+=$col_idx
-        ##sd_sumofsquares+=($col_idx*sd_count)-(sd_count*sd_count)
-        #sd_all_values[sd_count-1]=$col_idx
-
         # Saving the highest and lowest mesh values so we know how to scale the colors
         if ( length(min_value) == 0 || $col_idx < min_value ) 
             min_value = $col_idx;
@@ -77,20 +72,6 @@ BEGIN {
     }
 }
 END {
-    # sd_mean=sd_sumofmesh/sd_count
-    # sd_variance=sd_sumofmesh/(sd_count-1)
-
-    # for ( v in sd_all_values ){
-    #     s=sd_all_values[v]-sd_mean
-    #     sq=s*s;
-    #     sd_sumofsquares+=s*s
-    # }
-
-    # sd_variance=(sd_sumofsquares/(sd_count-1))
-    # sd_value=sqrt(sd_variance)
-    # print sd_value
-
-
     positive_gradient_scale_spacing = max_value/(ROW_COUNT-1);
     negative_gradient_scale_spacing = min_value/(ROW_COUNT-1);
     gradient_scale_cursor = max_value;
@@ -188,8 +169,15 @@ END {
                 gradient_scale_cursor = gradient_scale_cursor - positive_gradient_scale_spacing;
             else 
                 gradient_scale_cursor = gradient_scale_cursor + negative_gradient_scale_spacing;
+ 
+            # ˡᵒʷ
+            # ʰⁱᵍʰ
 
-            printf("\t\033[38;2;%s;48;2;%sm%s%s\033[0m %s\n", bottom_color, top_color, block["lower"], block["lower"], to_superset(trim_gradient(top_val)));
+            if ( row_idx_display == 1 )
+                printf("\t\033[38;2;%s;48;2;%sm%s%s\033[0m %s\n", bottom_color, top_color, block["lower"], block["lower"], to_superset(trim_gradient(top_val)));
+            else 
+                printf("\t\033[38;2;%s;48;2;%sm%s%s\033[0m %s\n", bottom_color, top_color, block["lower"], block["lower"], to_superset(trim_gradient(top_val)));
+
         }
         else if (row == length(results)) {
             printf("\t\033[38;2;%sm%s%s\033[0m %s\n", mesh_val_to_color(results[row][col]),  block["upper"], block["upper"],  to_superset(trim_gradient(min_value)));
@@ -197,36 +185,5 @@ END {
     }
 
     # Logic to show the X coordinates and arrows
-    printf("%s%s%-3s %s %3s%s\n", go2col(10), colors["coordinates"], coordinates["left"], coordinates["X"], coordinates["right"], "\033[0m");
-
-    #sd_mean=sd_sumofmesh/sd_count
-    #sd_variance=sd_sumofmesh/(sd_count-1)
-    
-    # printf("sd_count: %s\n", sd_count)
-    # printf("sd_sumofmesh: %s\n", sd_sumofmesh)
-    # #printf("sd_sumofsquares: %s\n", sd_sumofsquares)
-    # printf("sd_mean: %s\n",sd_mean)
-    # printf("sd_variance: %s\n",sd_variance)
-
-
-    # for ( v in sd_all_values ){
-    #     #s=( abs(sd_all_values[v])-sd_mean)-sd_mean
-    #     s=sd_all_values[v]-sd_mean
-    #     sq=s*s
-    #     sd_sumofsquares+=s*s
-    #     #printf("%s| %s: %s-%s = %s; squared: %s; sd_sumofsquares: %s\n", v, sd_all_values[v], sd_all_values[v], sd_mean, s, sq, sd_sumofsquares)
-    #     #print v, sd_all_values[v], (abs(sd_all_values[v])-sd_mean)-sd_mean
-    # }
-
-    # print sd_sumofsquares
-
-    # sd_variance=(sd_sumofsquares/(sd_count-1))
-    # print sd_variance
-    # sd_value=sqrt(sd_variance)
-    # print sd_value
-
-
-    #deviation_from_x= (abs(value)-mean)-mean = (-0.163969-0.209699)-0.209699 = 
-
-    
+    printf("%s%s%-3s %s %3s%s\n", go2col(10), colors["coordinates"], coordinates["left"], coordinates["X"], coordinates["right"], "\033[0m");   
 }

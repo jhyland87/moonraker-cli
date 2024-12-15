@@ -130,9 +130,10 @@ BEGIN {
     # Where to start the grid - The numbers will show before this.
     grid_start_indent = 3;
 
-    char_set["superset"]="⁰¹²³⁴⁵⁶⁷⁸⁹⁻⁺᠂⁼⁽⁾";
-    char_set["subset"]="₀₁₂₃₄₅₆₇₈₉₋₊․₌₍₎";
-    char_set["normal"]="0123456789-+.=()";
+    char_set["superset"]="⁰¹²³⁴⁵⁶⁷⁸⁹⁻⁺᠂⁼⁽⁾ˡˢˣʰʲʳʷʸ";
+    char_set["subset"]="₀₁₂₃₄₅₆₇₈₉₋₊․₌₍₎ₗₛₓₕ";
+    #ₒₓₕₖₘₙₚₜ
+    char_set["normal"]="0123456789-+.=()lsxhjrwy";
 
     block["upper"] = "\u2580"; # ▀
     block["lower"] = "\u2584"; # ▄ 
