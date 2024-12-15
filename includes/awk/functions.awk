@@ -40,11 +40,14 @@ function trim_gradient(value, char_len){
 # Takes a positive value and returns the corresponding gradient color from the
 # positive_colors array.
 function pos_mesh_val_to_color(mesh_val){
+    if ( mesh_val == 0 )
+        return positive_colors[0];
+    
     color_span = (length(positive_colors)-1)/max_value;
 
     # If the color span breaches the max_gradient_color_span, then set the color_span
     # to max_gradient_color_span
-    if ( color_span > max_gradient_color_span )
+    if ( length(max_gradient_color_span) > 0 && color_span > max_gradient_color_span )
         color_span = max_gradient_color_span
 
     if ( mesh_val > max_value )
@@ -60,11 +63,15 @@ function pos_mesh_val_to_color(mesh_val){
 # Note: the negative and positive gradients are in separate arrays because there
 # are likely different amounts/deviations between the positive and negative values.
 function neg_mesh_val_to_color(mesh_val){
+    #print "negative mesh_val",mesh_val
+     if ( mesh_val == 0 )
+        return negative_colors[0];
+
     color_span = (length(negative_colors)-1)/min_value;
     
     # If the color span breaches the max_gradient_color_span, then set the color_span
     # to max_gradient_color_span
-    if ( color_span < -max_gradient_color_span )
+    if ( length(max_gradient_color_span) > 0 && color_span < -max_gradient_color_span )
         color_span = -max_gradient_color_span
 
     if ( mesh_val < min_value ) 
@@ -72,12 +79,15 @@ function neg_mesh_val_to_color(mesh_val){
 
     idx = int(mesh_val * color_span);
 
-    return negative_colors[idx];
+    return negative_colors[idx+1];
 }
 
 # Takes a positive or negative numerical value and returns the corresponding mesh
 # color using eiher pos_mesh_val_to_color or neg_mesh_val_to_color
 function mesh_val_to_color(mesh_val){
+    if ( mesh_val == 0 ) 
+        return positive_colors[0];
+
     if ( mesh_val < 0 ) 
         return neg_mesh_val_to_color(mesh_val);
 
