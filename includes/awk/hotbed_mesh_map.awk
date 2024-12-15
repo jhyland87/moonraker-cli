@@ -50,21 +50,16 @@ BEGIN {
         # If this is after the first column, then generate/save the synthetic column value in the cell behind this one.
         if ( col_idx > 1 ){
             # Grab the cdll 2 cells away (since the enpty synthetic col is there), and average it with this one.
-            #current_row_last_synthetic_column = avg(results[new_row_idx][new_col_idx-2], current_mesh_value);
             results[new_row_idx][new_col_idx-1] = avg(results[new_row_idx][new_col_idx-2], current_mesh_value);
 
             # If were past the first row, then we can also generate the averaged values for the synthetic value one column/row behind
             if ( ROW_COUNT > 1)
-                #results[new_row_idx-1][new_col_idx-1] = avg(current_row_last_synthetic_column, results[new_row_idx-2][new_col_idx-1]);
                 results[new_row_idx-1][new_col_idx-1] = avg(results[new_row_idx][new_col_idx-1], results[new_row_idx-2][new_col_idx-1]);
-
-                
         }
 
         results[new_row_idx][new_col_idx] = current_mesh_value;
 
         if ( ROW_COUNT > 1){
-            #last_synthetic_row_current_column_value = avg(current_mesh_value, results[new_row_idx-2][new_col_idx]);
             results[new_row_idx-1][new_col_idx] = avg(current_mesh_value, results[new_row_idx-2][new_col_idx]);
         }
 
