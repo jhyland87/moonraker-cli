@@ -1,4 +1,4 @@
-#!/opt/homebrew/bin/gawk -f
+#!/usr/bin/env gawk -f 
 # 
 # DESCRIPTION
 #   Calculates the standard deviation and variance for a set of numbers
@@ -70,38 +70,17 @@ BEGIN {
             pos_value_collection[length(pos_value_collection)] = $col_idx;
 
             if( $col_idx > pos_max ){
-                pos_max = $col_idx
+                pos_max = $col_idx;
             }
             else if ($col_idx < pos_min){
-                pos_min = $col_idx
+                pos_min = $col_idx;
             }
         }
-
-
-
-        # # Size/count needed for calcs
-        # sd_count++;
-
-        # # Sum (also needed)
-        # sd_sum += $col_idx;
-
-        # # Store the value, since this will be needed when calculating the 
-        # sd_all_values[sd_count-1] = $col_idx;
     }
 }
 END {
-
-    # print "pos_count", pos_count
-    # print "pos_max", pos_max
-    # print "pos_min", pos_min
-    # print "neg_count", neg_count
-    # print "neg_max", neg_max
-    # print "neg_min", neg_min
-
     n = asort(neg_value_collection, neg_value_collection_sorted)
     p = asort(pos_value_collection, pos_value_collection_sorted)
-    #print "neg_value_collection", length(neg_value_collection)
-
     
     rounded_values[0]=0
     neg_max_occurrences = 1;

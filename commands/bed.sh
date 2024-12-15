@@ -32,8 +32,6 @@ bed.help() {
 [[ $1 == 'description' ]] && eval ${__module_name}.description && exit
 [[ $1 == 'help' ]] && eval ${__module_name}.help && exit 
 
-# echo ${__module_name^^} # EXAMPLE
-
 show_printer_state() {
 	require_moonraker_connect 
 	
@@ -66,18 +64,15 @@ bed.mesh(){
 	printf "${printFormat}\n" "Mesh matrix" "${mesh_matrix}"
 	printf "${printFormat}" "Probed range" "${mesh_range}"
 	printf "${printFormat}\n" "Mesh highest" "${mesh_highest}"
-	printf "${printFormat}" "Mesh lowest" "${mesh_lowest}"
-	printf "${printFormat}\n" "Std deviation" "${std_deviation}"
+	printf "${printFormat}" "Std deviation" "${std_deviation}"
+	printf "${printFormat}\n" "Mesh lowest" "${mesh_lowest}"
 	printf "${printFormat}" "Variance" "${variance}"
+	printf "\n"
 
 	jq --raw-output '.result.status.bed_mesh.mesh_matrix | reverse | .[] | @csv' "${TMP_DIR}/bed_mesh.tmp.json" | ./includes/awk/hotbed_mesh_map.awk
 }
 
 _debug "Arguments: $# - $*"
-
-# for p in "$@"; do
-# 	echo "${p}"
-# done
 
 subcmd="${1:-help}"
 

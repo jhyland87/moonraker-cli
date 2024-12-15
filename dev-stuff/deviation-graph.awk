@@ -1,4 +1,4 @@
-#!/opt/homebrew/bin/gawk -f
+#!/usr/bin/env gawk -f 
 # 
 # DESCRIPTION
 #   Calculates the standard deviation and variance for a set of numbers
@@ -22,7 +22,19 @@
 #
 # jq --raw-output '.result.status.bed_mesh.mesh_matrix | reverse | .[] | @csv' | ./includes/awk/standard-deviation.awk 
 #
+# curl http://192.168.0.96:7125 \
+#    --request GET \
+#    --request-target /printer/objects/query \
+#    --data bed_mesh=mesh_matrix \
+#    --silent \
+#    | jq --raw-output '[.result.status.bed_mesh.mesh_matrix[][]] | sort_by(.) | .[0] as $min | .[-1] as $max | $max+(-$min)'
 
+# curl http://192.168.0.96:7125 \
+#    --request GET \
+#    --request-target /printer/objects/query \
+#    --data bed_mesh=mesh_matrix \
+#    --silent \
+#    | jq --raw-output '[.result.status.bed_mesh.mesh_matrix[][]] | sort_by(.) | .[-1]+(-.[0])'
 
 # jq --raw-output '.result.status.bed_mesh.mesh_matrix | reverse | .[] | @csv' ./tmp/bed_mesh.tmp.json | ./dev-stuff/deviation-graph.awk
 

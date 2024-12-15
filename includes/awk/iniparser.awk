@@ -1,4 +1,4 @@
-#!/opt/homebrew/bin/gawk -f
+#!/usr/bin/env gawk -f 
 
 # $ ./includes/iniparser.sh k1c printer descriptiond  # Returns non-zero (fail) exit code)
 # $ ./includes/iniparser.sh k1c printer description   # Successfully found value

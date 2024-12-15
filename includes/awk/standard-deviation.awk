@@ -1,4 +1,4 @@
-#!/opt/homebrew/bin/gawk -f
+#!/usr/bin/env gawk -f 
 # 
 # DESCRIPTION
 #   Calculates the standard deviation and variance for a set of numbers

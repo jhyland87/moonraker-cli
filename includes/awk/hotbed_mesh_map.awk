@@ -1,7 +1,15 @@
-#!/opt/homebrew/bin/gawk -f
+#!/usr/bin/env gawk -f 
 # 
 # DESCRIPTION
 #   Generates a neat looking heatmap of the bed mesh from Klippers API output.
+#   This works by using the full width half block unicode character (▄) to compine
+#   two rows into a single row. Row #0 will be iterated over, saving the colors and 
+#   data to an array, then as row #1 is processed, the half-block character will use
+#   the color meant for row #0 as the background (top) color and the the color for 
+#   row #2 on the bottom.
+#   This does result in a much smaller mesh display which can be enlarged a bit by
+#   inserting "synthetic" columns and rows inbetween each row/column, then averaging
+#   the values on either side of the cell as they're being processed.
 #
 # TODO
 #   Currently this works for a 12/12 bed mesh, but it should be written so it'll
@@ -42,6 +50,9 @@ BEGIN {
 
         if ( length(max_value) == 0 || $col_idx > max_value ) 
             max_value = $col_idx;
+
+        #print "min_value:",min_value  >> "tmp/awk-logs.txt"
+        #print "max_value:",max_value  >> "tmp/awk-logs.txt"
 
         new_col_idx = get_new_idx(col_idx);
         last_new_col_idx = new_col_idx-1;
