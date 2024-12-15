@@ -63,7 +63,7 @@ BEGIN {
     positive_colors[59]="176;20;44";
 
     # Values that will be used for negative mesh value mappings
-    negative_colors[0]="255;251;185";
+    negative_colors[0]="255;251;185"; 
     negative_colors[1]="252;250;189";
     negative_colors[2]="249;249;193";
     negative_colors[3]="246;248;197";
@@ -130,10 +130,10 @@ BEGIN {
     # Where to start the grid - The numbers will show before this.
     grid_start_indent = 3;
 
-    char_set["superset"]="⁰¹²³⁴⁵⁶⁷⁸⁹⁻⁺᠂⁼⁽⁾ˡˢˣʰʲʳʷʸ";
-    char_set["subset"]="₀₁₂₃₄₅₆₇₈₉₋₊․₌₍₎ₗₛₓₕ";
+    char_set["superset"]="⁰¹²³⁴⁵⁶⁷⁸⁹⁻⁺᠂⁼⁽⁾ˡˢˣʰᵐᵒⁱʲʳʷʸᵍ";
+    char_set["subset"]="₀₁₂₃₄₅₆₇₈₉₋₊․₌₍₎ₗₛₓₕₘₒᵢjrwyg";
     #ₒₓₕₖₘₙₚₜ
-    char_set["normal"]="0123456789-+.=()lsxhjrwy";
+    char_set["normal"]="0123456789-+.=()lsxhmoijrwyg";
 
     block["upper"] = "\u2580"; # ▀
     block["lower"] = "\u2584"; # ▄ 
@@ -149,4 +149,6 @@ BEGIN {
     coordinates["right"] = "\u2B95"; # ⮕
     coordinates["X"] = "\uFF38";
     coordinates["Y"] = "\uFF39";
+
+    max_gradient_color_span = 600;
 } 

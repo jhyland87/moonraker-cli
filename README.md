@@ -50,3 +50,7 @@ moonraker printer info
 # Test printer service availability
 moonraker printer test
 ```
+
+---
+Bed Mesh Profile
+![Bed mesh profile](assets/images/moonraker_bed_mesh.png)

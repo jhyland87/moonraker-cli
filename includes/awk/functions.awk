@@ -1,7 +1,7 @@
 # Average two numbers.
 function avg(a, b){
     return (a+b)/2;
-}
+} 
 
 # Set the foreground color.
 function fg(color){
@@ -41,6 +41,11 @@ function trim_gradient(value, char_len){
 function pos_mesh_val_to_color(mesh_val){
     color_span = (length(positive_colors)-1)/max_value;
 
+    # If the color span breaches the max_gradient_color_span, then set the color_span
+    # to max_gradient_color_span
+    if ( color_span > max_gradient_color_span )
+        color_span = max_gradient_color_span
+
     if ( mesh_val > max_value )
         mesh_val = max_value;
 
@@ -55,6 +60,11 @@ function pos_mesh_val_to_color(mesh_val){
 # are likely different amounts/deviations between the positive and negative values.
 function neg_mesh_val_to_color(mesh_val){
     color_span = (length(negative_colors)-1)/min_value;
+    
+    # If the color span breaches the max_gradient_color_span, then set the color_span
+    # to max_gradient_color_span
+    if ( color_span < -max_gradient_color_span )
+        color_span = -max_gradient_color_span
 
     if ( mesh_val < min_value ) 
         mesh_val = min_value;
@@ -105,7 +115,6 @@ function make_chars(char_group){
     for (i=1; i <= length(char_set[char_group]); i++) {   
         key = substr(char_set["normal"],i,1);
         val = substr(char_set[char_group],i,1);
-
         charset_maps[char_group][key] = val;
     }
 }
