@@ -74,3 +74,11 @@ moonraker printer test
 
 ### Macros
 ![Macros](assets/images/moonraker_macros.png)
+
+
+## Todo
+1. Implement authentication of moonraker is locked down.
+2. Use config files for printer settings.
+3. Ability to connect to multiple printers.
+4. Unit tests?...
+5. Tons of other things....
