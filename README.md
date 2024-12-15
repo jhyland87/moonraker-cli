@@ -53,19 +53,19 @@ moonraker printer test
 
 ----
 
-# Screenshots
+## Screenshots
 
-## Help
+### Help
 ![Help](assets/images/moonraker_help_commands.png)
 
-## Printer tests
+### Printer tests
 ![Tests](assets/images/moonraker_printer_test.png)
 
-## Bed Mesh Profile
+### Bed Mesh Profile
 ![Bed mesh profile](assets/images/moonraker_bed_mesh.png)
 
-## File list
+### File list
 ![File list](assets/images/moonraker_file_list.png)
 
-## Printer temps
+### Printer temps
 ![Temps](assets/images/moonraker_printer_temps.png)
