@@ -69,3 +69,6 @@ moonraker printer test
 
 ### Printer temps
 ![Temps](assets/images/moonraker_printer_temps.png)
+
+### Macros
+![Macros](assets/images/moonraker_macros.png)
