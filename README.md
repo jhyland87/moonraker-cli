@@ -1,5 +1,10 @@
+---
+**NOTE**
 
+This isn't something that's actively maintained. There are some bugs that I have not fixed, or features I have not added. 
+This was mostly only tested with my K1C printer, but should work for any printer running Klipper (with accessible Moonraker API).
 
+---
 
 # Install
 ```bash
