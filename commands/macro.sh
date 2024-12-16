@@ -27,6 +27,23 @@ macro.help() {
 	declare -pf  | grep -E -A4  '^macro.' # | sed -E 's/^declare .* macro.//g'
 }
 
+macro.send(){
+	# curl http://192.168.0.96:7125 \
+	# 	  --request POST \
+	# 	  --request-target "/api/printer/command" \
+	# 	  --silent \
+	# 	  --json '{"commands":["BED_MESH_CALIBRATE"]}'
+
+	curl http://192.168.0.96:7125 \
+		  --request POST \
+		  --request-target "/api/printer/command" \
+		  -vv \
+		  --json '{"commands":["BED_MESH_CALIBRATE"]}'
+
+	echo "Sending command $1.."
+	_post "/api/printer/command" 'commands=["'$1'"]'
+}
+
 [[ $# -eq 0 ]] && exit
 [[ $1 == 'description' ]] && eval ${__module_name}.description && exit
 [[ $1 == 'help' ]] && eval ${__module_name}.help && exit

@@ -1,7 +1,53 @@
 # Average two numbers.
 function avg(a, b){
     return (a+b)/2;
-} 
+}
+
+# Adding a new row between each row. row*2-1 gets the new ID spacing
+# 1*2-1 = 1
+# 2*2-1 = 3
+# 3*2-1 = 5... etc
+function get_new_idx(id){
+    return id*2-1;
+}
+
+# function round(x, ival, aval, fraction){
+#    ival = int(x)    # integer part, int() truncates
+
+#    # see if fractional part
+#    if (ival == x)   # no fraction
+#       return ival   # ensure no decimals
+
+#    if (x < 0) {
+#       aval = -x     # absolute value
+#       ival = int(aval)
+#       fraction = aval - ival
+#       if (fraction >= .5)
+#          return int(x) - 1   # -2.5 --> -3
+#       else
+#          return int(x)       # -2.3 --> -2
+#    } else {
+#       fraction = x - ival
+#       if (fraction >= .5)
+#          return ival + 1
+#       else
+#          return ival
+#    }
+# }
+
+function round(num){
+    return sprintf("%.f", int(num+0.5));
+}
+
+# Get the absolute value (positive value) of a number.
+# abs(123)  = 123
+# abs(-123) = 123
+function abs(num){
+    if ( num < 0 ) 
+        return -num;
+
+    return num;
+}
 
 # Set the foreground color.
 function fg(color){
@@ -15,9 +61,7 @@ function bg(color){
 
 # Function to send the cursor to a specific location of the current line.
 function go2col(col) {
-    char = sprintf("\033[100D\033[%sC", col);
-    printf("%s", char);
-    #echo -en "\033[100D\033[${1:-0}C"
+    printf("%s", sprintf("\033[100D\033[%sC", col));
 }
 
 # Trim a number to a specific length. This will include the - char if
@@ -40,18 +84,33 @@ function trim_gradient(value, char_len){
 # Takes a positive value and returns the corresponding gradient color from the
 # positive_colors array.
 function pos_mesh_val_to_color(mesh_val){
+    # Set the min and max values to whichever is the largest absolute value, to keep the gradient
+    # scale a bit more consistent.
+    if ( abs(min_value) > max_value )
+        _value_limit = abs(min_value);
+    else
+        _value_limit = abs(max_value);
+
     if ( mesh_val == 0 )
         return positive_colors[0];
     
-    color_span = (length(positive_colors)-1)/max_value;
+    color_span = (length(positive_colors)-1)/_value_limit;
 
+    #print "mesh_val",mesh_val,"-_value_limit",-_value_limit,"color_span",color_span,"idx",idx,"negative_colors[idx+1]",negative_colors[idx+1]
+
+
+    if ( color_span > max_gradient_color_span ){
+        color_span = max_gradient_color_span;
+        #color_span = color_span*5
+    }
+    
     # If the color span breaches the max_gradient_color_span, then set the color_span
     # to max_gradient_color_span
-    if ( length(max_gradient_color_span) > 0 && color_span > max_gradient_color_span )
-        color_span = max_gradient_color_span
+    # if ( length(max_gradient_color_span) > 0 && color_span > max_gradient_color_span )
+    #     color_span = max_gradient_color_span;
 
-    if ( mesh_val > max_value )
-        mesh_val = max_value;
+    if ( mesh_val > _value_limit )
+        mesh_val = _value_limit;
 
     idx = int(mesh_val * color_span);
 
@@ -63,21 +122,38 @@ function pos_mesh_val_to_color(mesh_val){
 # Note: the negative and positive gradients are in separate arrays because there
 # are likely different amounts/deviations between the positive and negative values.
 function neg_mesh_val_to_color(mesh_val){
+    # Set the min and max values to whichever is the largest absolute value, to keep the gradient
+    # scale a bit more consistent.
+    if ( abs(min_value) > max_value )
+        _value_limit = abs(min_value);
+    else
+        _value_limit = max_value;
+
+    # color_span - mesh_values within this range will get the same color returned.
+    # This is just used to determine what mesh value ranges go to what colors.
+    color_span = (length(negative_colors)-1)/_value_limit;
+
+    if ( color_span < max_gradient_color_span ){
+        color_span = max_gradient_color_span;
+        #color_span = color_span*5
+    }
+
     #print "negative mesh_val",mesh_val
-     if ( mesh_val == 0 )
+     if ( mesh_val == 0 || mesh_value < -color_span)
         return negative_colors[0];
 
-    color_span = (length(negative_colors)-1)/min_value;
-    
     # If the color span breaches the max_gradient_color_span, then set the color_span
     # to max_gradient_color_span
-    if ( length(max_gradient_color_span) > 0 && color_span < -max_gradient_color_span )
-        color_span = -max_gradient_color_span
+    # if ( length(max_gradient_color_span) > 0 && color_span < -max_gradient_color_span )
+    #     color_span = -max_gradient_color_span;
 
-    if ( mesh_val < min_value ) 
-        mesh_val = min_value;
+    #print "mesh_val",mesh_val,"_value_limit",-_value_limit
+    if ( mesh_val < -_value_limit ) 
+        mesh_val = -_value_limit;
 
     idx = int(mesh_val * color_span);
+    idx = abs(idx)
+    #print "mesh_val",mesh_val,"-_value_limit",-_value_limit,"color_span",color_span,"idx",idx,"negative_colors[idx+1]",negative_colors[idx+1]
 
     return negative_colors[idx+1];
 }
@@ -123,65 +199,10 @@ function to_superset(string){
 # maps them to their corresponding values. The new mapping will be stored in a
 # newly created value in the charset_maps hash.
 function make_chars(char_group){
-    for (i=1; i <= length(char_set[char_group]); i++) {   
+    for ( i=1; i <= length(char_set[char_group]); i++ ) {   
         key = substr(char_set["normal"],i,1);
         val = substr(char_set[char_group],i,1);
+
         charset_maps[char_group][key] = val;
     }
 }
-
-# Adding a new row between each row. row*2-1 gets the new ID spacing
-# 1*2-1 = 1
-# 2*2-1 = 3
-# 3*2-1 = 5... etc
-function get_new_idx(id){
-    return id*2-1;
-}
-
-# function round(x, ival, aval, fraction){
-#    ival = int(x)    # integer part, int() truncates
-
-#    # see if fractional part
-#    if (ival == x)   # no fraction
-#       return ival   # ensure no decimals
-
-#    if (x < 0) {
-#       aval = -x     # absolute value
-#       ival = int(aval)
-#       fraction = aval - ival
-#       if (fraction >= .5)
-#          return int(x) - 1   # -2.5 --> -3
-#       else
-#          return int(x)       # -2.3 --> -2
-#    } else {
-#       fraction = x - ival
-#       if (fraction >= .5)
-#          return ival + 1
-#       else
-#          return ival
-#    }
-# }
-
-function round(num){
-    return sprintf( "%.f", int(num+0.5));
-}
-
-# Get the absolute value (positive value) of a number.
-# abs(123)  = 123
-# abs(-123) = 123
-function abs(num){
-    if ( num < 0) return -num
-    return num
-}
-
-# 𝑥ᵢ-𝑥
-# 𝑛
-# ﹦
-# ∑
-# ⅀
-# 𝜎 = sample
-# 𝜇 = population
-#     ＿＿＿＿＿＿＿＿
-#    ／ 𝑛
-# 𝜇=√ ∑ (𝑥𝑖−𝜇)²
-#     𝑖=1

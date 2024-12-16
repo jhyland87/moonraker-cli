@@ -26,6 +26,8 @@
 #       | jq --raw-output '.result.status.bed_mesh.mesh_matrix | reverse | .[] | @csv' \
 #       | ./hotbed_to_expanded_mesh.awk
 #
+# jq --raw-output '.result.status.bed_mesh.mesh_matrix | reverse | .[] | @csv' ./tmp/bed_mesh.tmp.json" | ./includes/awk/hotbed_mesh_map.awk
+#
 
 @include "./includes/awk/variables.awk";
 @include "./includes/awk/functions.awk";
