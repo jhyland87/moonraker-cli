@@ -37,7 +37,7 @@ BEGIN {
     asort(positive_colors, positive_colors2, "@val_num_desc") 
 
     for(i = length(positive_colors2); i > 0; i-- ){
-        printf("%3s \033[48;2;%sm%-12s\033[0m\n", i-1, positive_colors[i-1], positive_colors[i-1])
+        printf("%3s \033[48;2;%sm%-12s\033[0m\n", i-1, positive_colors[i-1], "  ")
     }
     # for ( color in positive_colors2 ){
     #     printf("%3s \033[48;2;%sm%-12s\033[0m\n", color-1, positive_colors[color-1], positive_colors[color-1])
@@ -45,7 +45,7 @@ BEGIN {
 
     print "NEGATIVE COLORS"
      for ( color in negative_colors ){
-        printf("%3s \033[48;2;%sm%-12s\033[0m\n", color, negative_colors[color], negative_colors[color])
+        printf("%3s \033[48;2;%sm%-12s\033[0m\n", color, negative_colors[color], "  ")
     }
    
 }

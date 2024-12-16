@@ -101,7 +101,6 @@ function pos_mesh_val_to_color(mesh_val){
 
     if ( color_span > max_gradient_color_span ){
         color_span = max_gradient_color_span;
-        #color_span = color_span*5
     }
     
     # If the color span breaches the max_gradient_color_span, then set the color_span
@@ -135,7 +134,6 @@ function neg_mesh_val_to_color(mesh_val){
 
     if ( color_span < max_gradient_color_span ){
         color_span = max_gradient_color_span;
-        #color_span = color_span*5
     }
 
     #print "negative mesh_val",mesh_val

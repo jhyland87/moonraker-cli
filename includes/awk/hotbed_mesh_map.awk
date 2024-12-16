@@ -33,6 +33,18 @@
 @include "./includes/awk/functions.awk";
 
 BEGIN {
+    negative_colors["xxxx"]=""
+    while(getline < "dev-stuff/negative-colors.list") {
+        negative_colors[length(negative_colors)-1] = $1
+    };
+    delete negative_colors["xxxx"];
+
+    positive_colors["xxxx"]=""
+    while(getline < "dev-stuff/positive-colors.list") {
+        positive_colors[length(positive_colors)-1] = $1
+    };
+    delete positive_colors["xxxx"];
+    
     FS=",";
     make_chars("superset");
     make_chars("subset");
@@ -202,7 +214,7 @@ END {
             }
             else {
                 if ( top_val == 0 ){
-                    printf("\033[38;2;%s;48;2;%sm%s%s\033[0m %s %s%s\n", bottom_color, top_color, block["lower"], block["lower"], to_superset(trim_gradient(top_val)), colors["xy"], to_superset("mm"));
+                    printf("\033[38;2;%s;48;2;%sm%s%s\033[0m %s\n", bottom_color, top_color, block["lower"], block["lower"], to_superset(trim_gradient("0.000")));
                 }
                 else {
                     printf("\033[38;2;%s;48;2;%sm%s%s\033[0m %s\n", bottom_color, top_color, block["lower"], block["lower"], to_superset(trim_gradient(top_val)));
