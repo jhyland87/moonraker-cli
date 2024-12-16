@@ -150,5 +150,5 @@ BEGIN {
     coordinates["X"] = "\uFF38";
     coordinates["Y"] = "\uFF39";
 
-    max_gradient_color_span = 600;
+    max_gradient_color_span = 350;
 } 

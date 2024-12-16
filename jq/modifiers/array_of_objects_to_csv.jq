@@ -52,20 +52,24 @@
 #    
 
 include "utils"; 
-(if type != "array" then error("root needs to be an array") end) |
-(if (.[0] | type != "object") then error("first array entry is not an object") end) |
+
+(if type != "array" 
+	then error("root needs to be an array") 
+end) |
+(if (.[0] | type != "object") 
+	then error("first array entry is not an object") 
+end) |
 (.[0] | to_entries | map(.key)) as $column_names |
-(if length == 0 then halt end) |
-(
-	$column_names | map(ascii_upcase)
-),
-(
-	.[] |
+(if length == 0 
+	then halt
+end) |
+( $column_names | map(ascii_upcase) ),
+(.[] |
 	select(type == "object") |
 	to_entries |
 	[.[] | select(.key| in_array($column_names[]) )] |
 	map(.value)
-) 
-| if ($ARGS.named | has("output")) and $ARGS.named["output"] == "tsv" then @tsv else @csv end
+) | 
+if ($ARGS.named | has("output")) and $ARGS.named["output"] == "tsv" then @tsv else @csv end
 
 

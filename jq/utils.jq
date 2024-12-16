@@ -50,5 +50,5 @@ def calc_variance(population):
 # Convert a float to an int in string format.
 # float_to_int(215.0) == "215"
 def float_to_int(num):
-  num | tonumber | floor | tostring;
+  . | num | tonumber | floor | tostring;
 

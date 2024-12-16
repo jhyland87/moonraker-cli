@@ -15,7 +15,7 @@
 #        "size": 9439635,
 #        "size_human": "9.44 MB",
 #        "modified": 1724362976.4302409,
-#        "date": "2024-08-22T21:42:56Z"
+#        "timestamp": "2024-08-22T21:42:56Z"
 #      },
 #      ... Up to 9 other records
 #    }
@@ -35,7 +35,7 @@
 #        "size": 9439635,
 #        "size_human": "9.44 MB",
 #        "modified": 1724362976.4302409,
-#        "date": "2024-08-22T21:42:56Z"
+#        "timestamp": "2024-08-22T21:42:56Z"
 #      },
 #      ... Up to 3 other records
 #    ]
@@ -57,7 +57,7 @@
 #        "size": 1495263,
 #        "size_human": "1.5 MB",
 #        "modified": 1719132318.8176918,
-#        "date": "2024-06-23T08:45:18Z"
+#        "timestamp": "2024-06-23T08:45:18Z"
 #      },
 #      {
 #        ...
@@ -87,23 +87,30 @@
 #        "size": 9439635,
 #        "size_human": "9.44 MB",
 #        "modified": 1724362976.4302409,
-#        "date": "2024-08-22T21:42:56Z"
+#        "timestamp": "2024-08-22T21:42:56Z"
 #      }
 #    ]
 
 
 include "utils"; 
-(if ($ARGS.named | has("limit")) then ($ARGS.named["limit"] | tonumber)  else 10 end) as $display_limit |
-(if ($ARGS.named | has("sort_by")) then $ARGS.named["sort_by"] else "modified" end) as $sort_by |
+
+(if ($ARGS.named | has("limit")) 
+	then ($ARGS.named["limit"] | tonumber)  
+	else 10 
+end) as $display_limit |
+(if ($ARGS.named | has("sort_by")) 
+	then $ARGS.named["sort_by"] 
+	else "modified" 
+end) as $sort_by |
 [.result[] | {
 	name: (.path | split("/")[-1]),
-	#directory: "/"(.path | split("/")[0:-1] | join("/")),
+	#directory: (.path | split("/")[0:-1] | join("/")),
 	path: .path, 
 	size: .size, 
 	size_human: (.size|bytes),
 	modified: .modified,
-	date: (.modified|todate)
-}] 
-| sort_by(getpath([$sort_by])) 
-| reverse 
-|.[0:$display_limit] #| .[].path
+	timestamp: (.modified|todate)
+}] |
+sort_by(getpath([$sort_by])) |
+reverse |
+.[0:$display_limit] #| .[].path

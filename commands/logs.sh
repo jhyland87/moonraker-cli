@@ -53,17 +53,23 @@ logs.help(){
 logs.list(){
 	require_moonraker_connect
 
-	local root_folder=${1:-gcodes}
+	_get /server/files/list root=logs | 
+		jq  --monochrome-output --raw-output \
+    		-L './jq/' \
+    		--from-file ./jq/filters/file.print__recently_modified.jq \
+    		--arg limit 5 | 
+    	jq --monochrome-output --raw-output \
+			-L './jq/' \
+			--from-file ./jq/modifiers/array_of_objects_to_csv.jq \
+			--arg output tsv | 
+		column -ts $'\t' | 
+		sed -e $'1s/^/\e[3m/' -e $'1s/$/\e[0m/'		
+}
 
-	#_get /server/files/list "root=${root_folder}" | jq -L '../jq/' 'include "utils"; [.result[] | {path: .path, modified_ts:.modified, modified_date: (.modified|todate), size: (.size|bytes), permissions: .permissions}] | sort_by(.modified_ts) | reverse'
-
-	_get /server/files/list 'root=gcodes' | 
-		jq \
-			--monochrome-output \
-			--raw-output \
-			-L "${__module_dir}/../jq" \
-			--from-file "${__module_dir}/../jq/filters/file.print__recently_modified.jq"  \
-			--arg limit 10 | json2table
+logs.download(){
+	logfile=${1:-moonraker.log}
+	# /server/files/{root}/{filename}
+	_get /server/files/logs/${logfile}
 }
 
 _debug "Arguments: $# - $*"
