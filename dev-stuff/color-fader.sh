@@ -102,8 +102,37 @@ fade () {
 #255;0;0 to 255;255;0 to 0;255;0
 
 
-fade one 3 0 255 249 180 255 129 116
-fade one 3 0 255 129 116 251 27 4
+#fade one 4 0 255 255 245 255 249 180
+#fade one 4 0 255 249 180 255 129 116
+#fade one 3 0 255 129 116 251 27 4
+
+# POSITIVE COLORS
+#echo "A"
+# fade one 4 0 255 255 245 255 242 170
+# #echo "B"
+# fade one 1 0 255 242 170 248 132 78 
+# #echo "C"
+# fade one 3 0 248 132 78 165 0 38
+
+#exit
+# echo "White"
+# fade one 1 0 255 255 228 255 255 245
+
+
+# fade one 2 0 96 150 197 223 244 248
+# echo
+# fade one 2 0 223 244 248 253 188 110
+# echo
+# fade one 2 0 253 188 110 165 0 39
+
+fade one 1 0 96 150 197 49 54 150
+exit
+#echo "light blue"
+fade one 2 0 255 255 245 131 185 216
+#echo "FROM LIGHT BLUE TO BLUE"
+fade one 2 0 131 185 216 49 54 149
+#echo "Darker blue"
+fade one 1 0  49 54 149 33 37 104
 exit
 
 # 166 0 38 
@@ -140,9 +169,9 @@ fade two 1 0 249 189 111 255 255 228
 
 echo "FROM OFF WHITE TO LIGHT BLUE"
 #fade one 2 0 248 248 248 155 204 226
-fade one 1 0 233 247 230 131 185 216
+fade one 2 0 233 247 230 131 185 216
 echo "FROM LIGHT BLUE TO BLUE"
-fade one 2 0 131 185 216 49 54 149
+fade one 3 0 131 185 216 49 54 149
 #fade one 3 0 155 204 226 49 54 150
 
 

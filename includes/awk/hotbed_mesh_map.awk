@@ -58,6 +58,9 @@ BEGIN {
 
     # While iterating over the columns for this line, well also inject the new averaged values for the new columns and rows.
     for ( col_idx = 1; col_idx <= COL_COUNT; col_idx++ ){
+        total_sum+=$col_idx;
+        total_cells++
+
         # Saving the highest and lowest mesh values so we know how to scale the colors
         if ( length(min_value) == 0 || $col_idx < min_value ) 
             min_value = $col_idx;

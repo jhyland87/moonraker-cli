@@ -41,8 +41,17 @@ function abs(num){
     return num;
 }
 
+# Just convert a number to a floaty.
+# float("1") = 1.000
+# float(3.2) = 3.200
 function float(number){
     return sprintf("%2.3f",number)
+}
+
+# Calculate the standard deviation. This does require the sum total of 
+# cell valus to be collected, as well as the cell count.
+function calc_sd(){
+    return sqrt((1/total_cells)*(total_sum - (((total_sum)^2)/total_cells)))/2;
 }
 
 # Adding a new row between each row. row*2-1 gets the new ID spacing
