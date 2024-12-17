@@ -323,3 +323,77 @@ _get_percent(){
 	result=$(echo "scale=1;(${b}/${a})*100" |bc -l)
 	echo "${result}%"
 }
+
+
+function show_loader {
+    display_txt="${1:-Loading}"
+    timeout_sec="${2:-10}"
+
+    declare -a patterns_small=('⠟' '⠯' '⠷' '⠾' '⠽' '⠻')
+    declare -a patterns_large=('⡿' '⣟' '⣯' '⣷' '⣾' '⣽' '⣻' '⢿')
+    # ➜ ✓
+
+    readarray -t colors < ./includes/data/loading-colors.list
+
+    repeat(){
+        local start=1
+        local end=${1:-80}
+        local str="${2:-=}"
+        local range=$(seq $start $end)
+        for i in $range ; 
+            do echo -n "$str"; 
+        done
+    }
+
+    cleanup() {
+        echo -en "\nExiting...\n"
+        tput cnorm
+    }
+
+    trap cleanup EXIT
+    tput civis
+
+    local idx=0
+    local color_idx=0
+    local total_iterations=0
+    local start_ts=$(date +%s)
+    local elipses=0
+    local update_increment=5 # Update the color and text every nth interation
+    local loop_sleep_interval=0.1
+    local return_code=0
+
+    while : ; do
+        local current_ts=$(date +%s)
+        local delta_ts=$((${current_ts}-${start_ts}))
+        local duration=$(gdate -d@${delta_ts} -u +%H:%M:%S)
+        local loading_txt="${display_txt}"$(repeat $elipses '.')
+
+        if  [[ $(($total_iterations % $update_increment)) -eq 0 ]]; then
+            let elipses++
+            [[ $elipses -gt 3 ]] && elipses=1
+        fi
+        
+        [[ $delta_ts -gt $timeout_sec ]] && 
+            loading_txt="Failed to load after ${timeout_sec} seconds" && 
+            return_code=2 &&
+            color_idx=$((${#colors[@]}-1))
+
+        printf "\r\e[38;2;%s;1m%s\e[0m [%-2s] \e[2m%-4s\e[0m %-50s" "${colors[$color_idx]}" "${patterns_large[$idx]}" $color_idx $duration "${loading_txt}"
+
+        [[ $delta_ts -gt $timeout_sec ]] && echo && break
+
+        let idx++
+        let total_iterations++
+
+        # Every 5th iteration, increment the color_idx
+        [[ $(($total_iterations % $update_increment)) -eq 0 ]] && 
+            [[ $color_idx -lt $((${#colors[@]}-1)) ]] && 
+            let color_idx++
+
+        [[ $idx -eq ${#patterns_large[@]} ]] && idx=0
+
+        sleep ${loop_sleep_interval}
+    done
+
+    return $return_code
+}

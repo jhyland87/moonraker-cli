@@ -34,13 +34,13 @@
 
 BEGIN {
     negative_colors["xxxx"]=""
-    while(getline < "dev-stuff/negative-colors.list") {
+    while(getline < "./includes/data/negative-colors.list") {
         negative_colors[length(negative_colors)-1] = $1
     };
     delete negative_colors["xxxx"];
 
     positive_colors["xxxx"]=""
-    while(getline < "dev-stuff/positive-colors.list") {
+    while(getline < "./includes/data/positive-colors.list") {
         positive_colors[length(positive_colors)-1] = $1
     };
     delete positive_colors["xxxx"];
@@ -180,7 +180,10 @@ END {
             top_color = mesh_val_to_color(gradient_scale_cursor);
             top_val = gradient_scale_cursor;
 
-            if ( gradient_scale_cursor > 0 ){
+            if ( gradient_scale_cursor > 0 && gradient_scale_cursor < positive_gradient_scale_spacing  ){
+                gradient_scale_cursor = 0.00
+            }
+            else if ( gradient_scale_cursor > 0 && gradient_scale_cursor > positive_gradient_scale_spacing  ){
                 gradient_scale_cursor = gradient_scale_cursor - positive_gradient_scale_spacing;
             }
             else {
@@ -190,34 +193,28 @@ END {
             bottom_color = mesh_val_to_color(gradient_scale_cursor);
             bottom_val = gradient_scale_cursor;
 
-            # If the gs cursor is between 0 and positive_gradient_scale_spacing (minimum positive value), then just
-            # set it to zero so we can have a neutral point on the graph
-            if ( gradient_scale_cursor >= 0 && gradient_scale_cursor <= positive_gradient_scale_spacing ){
-                gradient_scale_cursor = 0;
+            if ( float(gradient_scale_cursor) > 0 && float(gradient_scale_cursor) < float(positive_gradient_scale_spacing)  ){
+                gradient_scale_cursor = 0
             }
-            # If the gs cursor is between 0 and negative_gradient_scale_spacing, then set it to negative_gradient_scale_spacing
-            else if ( gradient_scale_cursor < 0 && gradient_scale_cursor >= negative_gradient_scale_spacing ){
-                gradient_scale_cursor = negative_gradient_scale_spacing
+            else if ( float(gradient_scale_cursor) == float(positive_gradient_scale_spacing)){
+                gradient_scale_cursor = float(positive_gradient_scale_spacing);
             }
-            # I the cursor is a positive value, then remove one positive gradient level 
-            else if ( gradient_scale_cursor > 0 ){
+            else if ( gradient_scale_cursor > 0 && gradient_scale_cursor > positive_gradient_scale_spacing  ){
                 gradient_scale_cursor = gradient_scale_cursor - positive_gradient_scale_spacing;
             }
-            # I the cursor is a negative value, then add one negative gradient level 
             else {
                 gradient_scale_cursor = gradient_scale_cursor + negative_gradient_scale_spacing;
             }
-
             go2col(32);
             if ( row_idx_display == 1 ){
-                printf("\033[38;2;%s;48;2;%sm%s%s\033[0m %s\n", bottom_color, top_color, block["lower"], block["lower"], to_superset(trim_gradient(top_val)));
+                printf("\033[38;2;%s;48;2;%sm%s%s\033[0m %s\n", bottom_color, top_color, block["lower"], block["lower"], to_superset(trim_gradient(float(gradient_scale_cursor))));
             }
             else {
-                if ( top_val == 0 ){
+                if ( float(gradient_scale_cursor) == 0 ){
                     printf("\033[38;2;%s;48;2;%sm%s%s\033[0m %s\n", bottom_color, top_color, block["lower"], block["lower"], to_superset(trim_gradient("0.000")));
                 }
                 else {
-                    printf("\033[38;2;%s;48;2;%sm%s%s\033[0m %s\n", bottom_color, top_color, block["lower"], block["lower"], to_superset(trim_gradient(top_val)));
+                    printf("\033[38;2;%s;48;2;%sm%s%s\033[0m %s\n", bottom_color, top_color, block["lower"], block["lower"], to_superset(trim_gradient(float(gradient_scale_cursor))));
                 }
             }
         }

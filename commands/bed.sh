@@ -68,6 +68,8 @@ bed.mesh(){
 	printf "${printFormat}" "Variance" "${variance}"
 	printf "\n"
 
+	#show_loader "Lading..." 5
+
 	# Print the actual bed mesh render
 	jq --raw-output '.result.status.bed_mesh.mesh_matrix | reverse | .[] | @csv' "${TMP_DIR}/bed_mesh.tmp.json" | ./includes/awk/hotbed_mesh_map.awk
 }

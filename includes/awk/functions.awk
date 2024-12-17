@@ -3,14 +3,6 @@ function avg(a, b){
     return (a+b)/2;
 }
 
-# Adding a new row between each row. row*2-1 gets the new ID spacing
-# 1*2-1 = 1
-# 2*2-1 = 3
-# 3*2-1 = 5... etc
-function get_new_idx(id){
-    return id*2-1;
-}
-
 # function round(x, ival, aval, fraction){
 #    ival = int(x)    # integer part, int() truncates
 
@@ -49,6 +41,18 @@ function abs(num){
     return num;
 }
 
+function float(number){
+    return sprintf("%2.3f",number)
+}
+
+# Adding a new row between each row. row*2-1 gets the new ID spacing
+# 1*2-1 = 1
+# 2*2-1 = 3
+# 3*2-1 = 5... etc
+function get_new_idx(id){
+    return id*2-1;
+}
+
 # Set the foreground color.
 function fg(color){
     printf("\033[38;2;%sm", color);
@@ -75,7 +79,7 @@ function trim_gradient(value, char_len){
     if ( length(char_len) == 0 ) 
         char_len = 5;
 
-    if ( value < 0 )
+    if ( value < 0 ) 
         return substr(value, 0, char_len+1);
 
     return substr(value, 0, char_len);
@@ -86,31 +90,28 @@ function trim_gradient(value, char_len){
 function pos_mesh_val_to_color(mesh_val){
     # Set the min and max values to whichever is the largest absolute value, to keep the gradient
     # scale a bit more consistent.
-    if ( abs(min_value) > max_value )
+    if ( abs(min_value) > max_value ) 
         _value_limit = abs(min_value);
-    else
+    else  
         _value_limit = abs(max_value);
 
-    if ( mesh_val == 0 )
+    if ( mesh_val == 0 ) 
         return positive_colors[0];
     
     color_span = (length(positive_colors)-1)/_value_limit;
 
     #print "mesh_val",mesh_val,"-_value_limit",-_value_limit,"color_span",color_span,"idx",idx,"negative_colors[idx+1]",negative_colors[idx+1]
-
-
-    if ( color_span > max_gradient_color_span ){
+    if ( length(max_gradient_color_span) > 0 && color_span > max_gradient_color_span ) 
         color_span = max_gradient_color_span;
-    }
     
     # If the color span breaches the max_gradient_color_span, then set the color_span
     # to max_gradient_color_span
-    # if ( length(max_gradient_color_span) > 0 && color_span > max_gradient_color_span )
-    #     color_span = max_gradient_color_span;
+    if ( length(max_gradient_color_span) > 0 && color_span > max_gradient_color_span ) 
+        color_span = max_gradient_color_span;
 
-    if ( mesh_val > _value_limit )
+    if ( mesh_val > _value_limit ) 
         mesh_val = _value_limit;
-
+    
     idx = int(mesh_val * color_span);
 
     return positive_colors[idx];
@@ -123,30 +124,29 @@ function pos_mesh_val_to_color(mesh_val){
 function neg_mesh_val_to_color(mesh_val){
     # Set the min and max values to whichever is the largest absolute value, to keep the gradient
     # scale a bit more consistent.
-    if ( abs(min_value) > max_value )
+    if ( abs(min_value) > min_value ) 
         _value_limit = abs(min_value);
-    else
+    else 
         _value_limit = max_value;
 
     # color_span - mesh_values within this range will get the same color returned.
     # This is just used to determine what mesh value ranges go to what colors.
     color_span = (length(negative_colors)-1)/_value_limit;
 
-    if ( color_span < max_gradient_color_span ){
+    if (length(max_gradient_color_span) > 0 && color_span < max_gradient_color_span ) 
         color_span = max_gradient_color_span;
-    }
 
     #print "negative mesh_val",mesh_val
-     if ( mesh_val == 0 || mesh_value < -color_span)
+    if ( mesh_val == 0 || mesh_value < -color_span ) 
         return negative_colors[0];
 
     # If the color span breaches the max_gradient_color_span, then set the color_span
     # to max_gradient_color_span
-    # if ( length(max_gradient_color_span) > 0 && color_span < -max_gradient_color_span )
-    #     color_span = -max_gradient_color_span;
+    if ( length(max_gradient_color_span) > 0 && color_span < -max_gradient_color_span ) 
+        color_span = -max_gradient_color_span;
 
     #print "mesh_val",mesh_val,"_value_limit",-_value_limit
-    if ( mesh_val < -_value_limit ) 
+    if ( mesh_val < -_value_limit )  
         mesh_val = -_value_limit;
 
     idx = int(mesh_val * color_span);
@@ -159,12 +159,12 @@ function neg_mesh_val_to_color(mesh_val){
 # Takes a positive or negative numerical value and returns the corresponding mesh
 # color using eiher pos_mesh_val_to_color or neg_mesh_val_to_color
 function mesh_val_to_color(mesh_val){
-    if ( mesh_val == 0 ) 
+    if ( mesh_val == 0 )  
         return positive_colors[0];
 
-    if ( mesh_val < 0 ) 
+    if ( mesh_val < 0 )  
         return neg_mesh_val_to_color(mesh_val);
-
+        
     return pos_mesh_val_to_color(mesh_val);
 }
 
