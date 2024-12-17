@@ -65,9 +65,6 @@ BEGIN {
         if ( length(max_value) == 0 || $col_idx > max_value ) 
             max_value = $col_idx;
 
-        #print "min_value:",min_value  >> "tmp/awk-logs.txt"
-        #print "max_value:",max_value  >> "tmp/awk-logs.txt"
-
         new_col_idx = get_new_idx(col_idx);
         last_new_col_idx = new_col_idx-1;
         current_mesh_value = $col_idx;
@@ -161,7 +158,7 @@ END {
                 previous_row_colors[col] = mesh_val_to_color(results[row][col]);
                 continue;
             }
-            
+
             printf("\033[38;2;%s;48;2;%sm%s\033[0m", mesh_val_to_color(results[row][col]), previous_row_colors[col], block["lower"]);
         }
         
@@ -180,10 +177,11 @@ END {
             top_color = mesh_val_to_color(gradient_scale_cursor);
             top_val = gradient_scale_cursor;
 
-            if ( gradient_scale_cursor > 0 && gradient_scale_cursor < positive_gradient_scale_spacing  ){
-                gradient_scale_cursor = 0.00
+             if ( gradient_scale_cursor > 0 && float(gradient_scale_cursor) < float(positive_gradient_scale_spacing)  ){
+                gradient_scale_cursor = 0
+                top_color = mesh_val_to_color(0)
             }
-            else if ( gradient_scale_cursor > 0 && gradient_scale_cursor > positive_gradient_scale_spacing  ){
+            else if ( gradient_scale_cursor > 0 && float(gradient_scale_cursor) > float(positive_gradient_scale_spacing)  ){
                 gradient_scale_cursor = gradient_scale_cursor - positive_gradient_scale_spacing;
             }
             else {
@@ -193,7 +191,7 @@ END {
             bottom_color = mesh_val_to_color(gradient_scale_cursor);
             bottom_val = gradient_scale_cursor;
 
-            if ( float(gradient_scale_cursor) > 0 && float(gradient_scale_cursor) < float(positive_gradient_scale_spacing)  ){
+            if ( gradient_scale_cursor > 0 && float(gradient_scale_cursor) < float(positive_gradient_scale_spacing)  ){
                 gradient_scale_cursor = 0
             }
             else if ( float(gradient_scale_cursor) == float(positive_gradient_scale_spacing)){
@@ -205,15 +203,20 @@ END {
             else {
                 gradient_scale_cursor = gradient_scale_cursor + negative_gradient_scale_spacing;
             }
+
             go2col(32);
             if ( row_idx_display == 1 ){
                 printf("\033[38;2;%s;48;2;%sm%s%s\033[0m %s\n", bottom_color, top_color, block["lower"], block["lower"], to_superset(trim_gradient(float(gradient_scale_cursor))));
             }
             else {
-                if ( float(gradient_scale_cursor) == 0 ){
+                if ( gradient_scale_cursor == 0 ){
+                    
                     printf("\033[38;2;%s;48;2;%sm%s%s\033[0m %s\n", bottom_color, top_color, block["lower"], block["lower"], to_superset(trim_gradient("0.000")));
                 }
                 else {
+                    top_color = mesh_val_to_color(top_val)
+                    bottom_color = mesh_val_to_color(bottom_val)
+
                     printf("\033[38;2;%s;48;2;%sm%s%s\033[0m %s\n", bottom_color, top_color, block["lower"], block["lower"], to_superset(trim_gradient(float(gradient_scale_cursor))));
                 }
             }
