@@ -278,6 +278,7 @@ in_array(){
 # 	.641833
 # 	$ ns2sec `gdate +%N` 2 	
 # 	.64
+#
 ns2sec(){
 	bc <<< "scale=${2:-6}; ${1?no nanoseconds value provided}/1000000000"
 }
