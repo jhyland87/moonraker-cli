@@ -404,8 +404,8 @@ function loader_animation {
                 color_idx=$((${#colors[@]}-1))
         fi
 
-
 		_home
+		
 		if [[ $show_duration -eq 1 ]]; then
 	        printf "\e[38;2;%s;1m%s\e[0m \e[38;5;24m[PID %s]\e[0m \e[2;3m%-4s\e[0m %-50s" "${colors[$color_idx]}" "${patterns_large[$idx]}" $pid $duration "${loading_txt}"
 		else
@@ -415,11 +415,10 @@ function loader_animation {
         # If the process has closed, then we can exit the loop
         if [[ $loading_proc_status -eq 1 ]]; then
 			[[ $post_pause_sec -ne 0 ]] && sleep $post_pause_sec
+
             if [[ $clear_status_on_success -ne 1 ]]; then
-				#[[ $post_pause_sec -ne 0 ]] && sleep $post_pause_sec
 			    echo
 			else
-				#[[ $post_pause_sec -ne 0 ]] && sleep $post_pause_sec
 				_home && printf "%$(tput cols)s\r" " "
 			fi
 
@@ -429,6 +428,7 @@ function loader_animation {
         # Or if we've timed out
        	if [[ $delta_ts -gt $timeout_sec ]]; then
 			[[ $post_pause_sec -ne 0 ]] && sleep $post_pause_sec
+
 			echo
 			break;
 		fi 
