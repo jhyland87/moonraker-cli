@@ -36,7 +36,7 @@ example.help() {
 [[ $1 == 'help' ]] && eval ${__module_name}.help && exit
 
 show_printer_state() {
-	require_moonraker_connect 
+	require_moonraker_api 
 	
 	local limit="${1:-20}"
 

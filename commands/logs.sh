@@ -51,7 +51,7 @@ logs.help(){
 
 
 logs.list(){
-	require_moonraker_connect
+	require_moonraker_api
 
 	_get /server/files/list root=logs | 
 		jq  --monochrome-output --raw-output \

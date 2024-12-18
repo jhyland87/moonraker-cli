@@ -26,6 +26,9 @@ source ${CLI_DIR}/includes/connect.sh
 #source ${CLI_DIR}/includes/prompts.sh
 
 
+require_moonraker_ping
+require_moonraker_api
+
 # Global r/w integer settings
 declare -igx LOG_LEVEL=${LOG_LEVEL:=1} MOONRAKER_TIMEOUT
 

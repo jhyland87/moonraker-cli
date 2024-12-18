@@ -33,13 +33,15 @@
 @include "./includes/awk/functions.awk";
 
 BEGIN {
-    negative_colors["xxxx"]=""
+    # If I try to use the negative_colors array in the while loop without creating it before, I get
+    # fatal: attempt to use scalar `negative_colors' as an array
+    negative_colors["xxxx"]="";
     while(getline < "./includes/data/negative-colors.list") {
         negative_colors[length(negative_colors)-1] = $1
     };
     delete negative_colors["xxxx"];
 
-    positive_colors["xxxx"]=""
+    positive_colors["xxxx"]="";
     while(getline < "./includes/data/positive-colors.list") {
         positive_colors[length(positive_colors)-1] = $1
     };
@@ -58,7 +60,7 @@ BEGIN {
 
     # While iterating over the columns for this line, well also inject the new averaged values for the new columns and rows.
     for ( col_idx = 1; col_idx <= COL_COUNT; col_idx++ ){
-        total_sum+=$col_idx;
+        total_sum += $col_idx;
         total_cells++
 
         # Saving the highest and lowest mesh values so we know how to scale the colors
@@ -92,6 +94,10 @@ BEGIN {
     }
 }
 END {
+    if ( max_value == 0 ) _err("Invalid max value");
+    if ( min_value == 0 ) _err("Invalid min value");
+    if ( ROW_COUNT == 0 ) _err("No ROW_COUNT found");
+
     positive_gradient_scale_spacing = max_value/(ROW_COUNT-1);
     negative_gradient_scale_spacing = min_value/(ROW_COUNT-1);
     gradient_scale_cursor = max_value;

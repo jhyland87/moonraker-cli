@@ -1,4 +1,5 @@
 BEGIN {
+    #CONVFMT = "%2.7f"
     colors["coordinates"] = "\033[38;2;37;1m";
     colors["xy"] = "\033[38;5;242m";
 

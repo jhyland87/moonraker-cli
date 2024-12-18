@@ -45,7 +45,7 @@ status.status(){
 [[ $1 == 'help' ]] && eval ${__module_name}.help && exit
 
 status.fans(){
-	require_moonraker_connect
+	require_moonraker_api
 
 	local _term_cols=$((`tput cols`-5))
 	local _term_lines=$((`tput lines`/2-3))
@@ -78,12 +78,12 @@ status.fans(){
 }
 
 status.socket(){
-	require_moonraker_connect
+	require_moonraker_api
 }
 
 
 status.extruder(){
-	require_moonraker_connect
+	require_moonraker_api
 	
 	local _term_cols=$((`tput cols`-5))
 	local _term_lines=$((`tput lines`/2-3))
@@ -149,7 +149,7 @@ status.extruder(){
 }
 
 status.hotbed(){
-	require_moonraker_connect
+	require_moonraker_api
 	
 	local _term_cols=$((`tput cols`-5))
 	local _term_lines=$((`tput lines`/2-3))
@@ -199,7 +199,7 @@ status.hotbed(){
 }
 
 status.mcutemp(){
-	require_moonraker_connect
+	require_moonraker_api
 	
 	local min_cols=130 min_lines=7 max_lines=12
 	local _term_cols=$((`tput cols`-5))  _term_lines=$((`tput lines`/2-3))
@@ -258,7 +258,7 @@ status.mcutemp(){
 }
 
 status.chambertemp(){
-	require_moonraker_connect
+	require_moonraker_api
 	
 	local _term_cols=$((`tput cols`-5))
 	local _term_lines=$((`tput lines`/2-3))
@@ -309,7 +309,7 @@ status.chambertemp(){
 }
 
 status.chamberfan(){
-	require_moonraker_connect
+	require_moonraker_api
 	
 	local _term_cols=$((`tput cols`-5))
 	local _term_lines=$((`tput lines`/2-3))
@@ -363,7 +363,7 @@ status.chamberfan(){
 }
 
 status.chamberfanspeed(){
-	require_moonraker_connect
+	require_moonraker_api
 	
 	local min_cols=130 min_lines=7 
 	local _term_cols=$((`tput cols`-5))  _term_lines=$((`tput lines`/2-3))
@@ -403,7 +403,7 @@ status.chamberfanspeed(){
 }
 
 status.temps(){
-	require_moonraker_connect
+	require_moonraker_api
 	
 	term_cols=$((`tput cols`-5))
 	term_lines=$((`tput lines`/5-3))
@@ -422,7 +422,7 @@ status.temps(){
 
 
 status.show(){
-	require_moonraker_connect
+	require_moonraker_api
 	
 	echo "Checking status"
 }

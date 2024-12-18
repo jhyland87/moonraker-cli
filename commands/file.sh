@@ -58,7 +58,7 @@ is_printing() {
 }
 
 file.roots(){
-	require_moonraker_connect
+	require_moonraker_api
 
 	# /server/files/roots
 
@@ -66,7 +66,7 @@ file.roots(){
 }
 
 file.list(){
-	require_moonraker_connect
+	require_moonraker_api
 
 	local root_folder=${1:-gcodes}
 
@@ -82,7 +82,7 @@ file.list(){
 }
 
 file.print(){
-	require_moonraker_connect
+	require_moonraker_api
 
 	is_printing && 
 		echo "There is already a print in progress. You can cancel this print (moonraker print cancel) or wait for it to finish" 1>&2 && 
@@ -146,7 +146,7 @@ file.delete(){
 	#echo "\$@: $@"
 	#echo "\$*: $*"
 	#return
-	require_moonraker_connect
+	require_moonraker_api
 
 
 	local force=false

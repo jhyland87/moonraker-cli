@@ -42,7 +42,7 @@ printer.connect(){
 }
 
 show_printer_state() {
-	require_moonraker_connect 
+	require_moonraker_api 
 
 	local limit="${1:-20}"
 
@@ -55,7 +55,7 @@ show_printer_state() {
 }
 
 test_mjpg_streamer(){
-	require_moonraker_connect
+	require_moonraker_api
 
 	port=${1:-8080}
 

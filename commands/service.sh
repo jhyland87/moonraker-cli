@@ -57,7 +57,7 @@ show_print_state() {
 	echo "show_print_state..."
 }
 
-require_moonraker_connect
+require_moonraker_api
 
 	declare -a jq_switches=()
 

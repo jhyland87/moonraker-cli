@@ -79,7 +79,7 @@ macro.help(){
 
 
 macro.list(){
-	require_moonraker_connect
+	require_moonraker_api
 
 	#local object_list=$(_get /printer/objects/list)
 

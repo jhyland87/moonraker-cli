@@ -34,7 +34,7 @@ watch.help() {
 
 _debug "Arguments: $# - $*"
 
-require_moonraker_connect
+require_moonraker_api
 
 #subcmd="${1:-help}"
 #subcmd_fn="${__module_name}.${subcmd}"

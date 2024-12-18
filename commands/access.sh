@@ -37,44 +37,44 @@ access.help() {
 
 
 access.oneshot(){
-	require_moonraker_connect 
+	require_moonraker_api 
 	_get "/access/oneshot_token" | jq '.result'
 }
 
 access.apikey(){
-	require_moonraker_connect 
+	require_moonraker_api 
 	_get "/access/api_key" | jq '.result'
 }
 
 access.refreshjwt(){
-	require_moonraker_connect 
+	require_moonraker_api 
 	[[ ! -f ~/.moonraker-auth ]] && echo "No auth file found at ~/.moonraker-auth" 1>&2 && return 1
 	local refresh_token=$(jq '.result.refresh_token' ~/.moonraker-auth -r)
 	_post "/access/refresh_jwt" "refresh_token=${refresh_token}" | jq '.result'
 }
 
 access.login(){
-	require_moonraker_connect 
+	require_moonraker_api 
 	_post "/access/login" "username=jhyland;password=68477f9;source=moonraker" | tee ~/.moonraker-auth | jq '.result | {username, token}' | yq e -P -
 }
 
 access.logout(){
-	require_moonraker_connect 
+	require_moonraker_api 
 	_post "/access/logout" | jq '.result'
 }
 
 access.id(){
-	require_moonraker_connect 
+	require_moonraker_api 
 	_get "/access/user" | jq '.result'
 }
 
 access.info(){
-	require_moonraker_connect 
+	require_moonraker_api 
 	_get "/access/info" | jq '.result'
 }
 
 access.users(){
-	require_moonraker_connect 
+	require_moonraker_api 
 	_get "/access/users/list" | jq '.result'
 }
 

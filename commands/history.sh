@@ -50,7 +50,7 @@ DEBUG=false
 
 
 history.list(){
-	require_moonraker_connect
+	require_moonraker_api
 
 	# DESCRIPTION: Outputs the status of the current job
 	# SYNTAX: moonraker job status
@@ -60,7 +60,7 @@ history.list(){
 }
 
 history.totals(){
-	require_moonraker_connect
+	require_moonraker_api
 
 	_get /server/history/totals | jq '.result.job_totals'
 }

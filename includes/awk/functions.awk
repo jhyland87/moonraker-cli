@@ -211,3 +211,9 @@ function make_chars(char_group){
         charset_maps[char_group][key] = val;
     }
 }
+
+
+function _err(msg){
+    print "ERROR:",msg > "/dev/stderr"
+    exit 1
+}

@@ -325,9 +325,18 @@ _get_percent(){
 }
 
 
-function show_loader {
-    display_txt="${1:-Loading}"
-    timeout_sec="${2:-10}"
+# Example usage:
+# 	curl 'http://192.168.0.96:7125/server/history/list' --silent --output ./tmp/history.json &
+# 	loader_animation $! "Loading printer history" 10 1 && echo "Successfully download history"
+function loader_animation {
+    local pid=$!
+    local display_txt="${2:-Loading}"
+    local timeout_sec="${3:-10}"
+    local show_duration=${4:-0}
+    local clear_status_on_success=${5:-0}
+	local post_pause_sec=${6:-0}
+	local command=$(ps -o command="" -p $pid)
+	local command_bin=$(ps -o comm="" -p $pid)
 
     declare -a patterns_small=('⠟' '⠯' '⠷' '⠾' '⠽' '⠻')
     declare -a patterns_large=('⡿' '⣟' '⣯' '⣷' '⣾' '⣽' '⣻' '⢿')
@@ -346,7 +355,7 @@ function show_loader {
     }
 
     cleanup() {
-        echo -en "\nExiting...\n"
+        #echo -en "\nExiting...\n"
         tput cnorm
     }
 
@@ -361,26 +370,68 @@ function show_loader {
     local update_increment=5 # Update the color and text every nth interation
     local loop_sleep_interval=0.1
     local return_code=0
+    local loading_proc_status=0
+	local cursor_line=${LINENO}
 
-    while : ; do
+	# Simple home function for hte cursor. This works better than using just \r alone since \r doesn't
+	# account for the fact that users can scroll or hit enter while the program is running.
+	_home(){
+		tput cup $cursor_line 0 && printf '\r';
+	}
+
+    while [[ $loading_proc_status -ne 1 ]]; do
+        ps -p $pid > /dev/null
+        local loading_proc_status=$?
         local current_ts=$(date +%s)
         local delta_ts=$((${current_ts}-${start_ts}))
         local duration=$(gdate -d@${delta_ts} -u +%H:%M:%S)
         local loading_txt="${display_txt}"$(repeat $elipses '.')
 
-        if  [[ $(($total_iterations % $update_increment)) -eq 0 ]]; then
-            let elipses++
-            [[ $elipses -gt 3 ]] && elipses=1
+        if [[ $loading_proc_status -eq 1 ]]; then
+            loading_txt="${command_bin}: PID ${pid} has completed"
+            return_code=0
+            color_idx=0
+        else
+            # Grow the elipses every 3 iterations
+            if  [[ $(($total_iterations % $update_increment)) -eq 0 ]]; then
+                let elipses++
+                [[ $elipses -gt 3 ]] && elipses=1
+            fi
+
+            [[ $delta_ts -gt $timeout_sec ]] && 
+                loading_txt="${command_bin}: Failed to load after ${timeout_sec} seconds" && 
+                return_code=2 &&
+                color_idx=$((${#colors[@]}-1))
         fi
-        
-        [[ $delta_ts -gt $timeout_sec ]] && 
-            loading_txt="Failed to load after ${timeout_sec} seconds" && 
-            return_code=2 &&
-            color_idx=$((${#colors[@]}-1))
 
-        printf "\r\e[38;2;%s;1m%s\e[0m [%-2s] \e[2m%-4s\e[0m %-50s" "${colors[$color_idx]}" "${patterns_large[$idx]}" $color_idx $duration "${loading_txt}"
 
-        [[ $delta_ts -gt $timeout_sec ]] && echo && break
+		_home
+		if [[ $show_duration -eq 1 ]]; then
+	        printf "\e[38;2;%s;1m%s\e[0m \e[38;5;24m[PID %s]\e[0m \e[2;3m%-4s\e[0m %-50s" "${colors[$color_idx]}" "${patterns_large[$idx]}" $pid $duration "${loading_txt}"
+		else
+			printf "\e[38;2;%s;1m%s\e[0m %-50s" "${colors[$color_idx]}" "${patterns_large[$idx]}" "${loading_txt}"
+		fi
+
+        # If the process has closed, then we can exit the loop
+        if [[ $loading_proc_status -eq 1 ]]; then
+			[[ $post_pause_sec -ne 0 ]] && sleep $post_pause_sec
+            if [[ $clear_status_on_success -ne 1 ]]; then
+				#[[ $post_pause_sec -ne 0 ]] && sleep $post_pause_sec
+			    echo
+			else
+				#[[ $post_pause_sec -ne 0 ]] && sleep $post_pause_sec
+				_home && printf "%$(tput cols)s\r" " "
+			fi
+
+            break;
+        fi
+
+        # Or if we've timed out
+       	if [[ $delta_ts -gt $timeout_sec ]]; then
+			[[ $post_pause_sec -ne 0 ]] && sleep $post_pause_sec
+			echo
+			break;
+		fi 
 
         let idx++
         let total_iterations++
@@ -396,4 +447,39 @@ function show_loader {
     done
 
     return $return_code
+}
+
+
+# LOADER - 	This is a simple wrapper around loader_animation, but it takes command line style
+# 			switches for the arguments, just to make it a little easeir to implement
+# Example usage:
+# 	curl 'http://192.168.0.96:7125/server/history/list' --silent --output ./tmp/history.json &
+# 	loader $! -label "Loading printer history" -timeout 10 -hide && echo "Successfully download history"
+function loader {
+    local opts=("$@")
+    local pid=$1
+    local loading_text="Loading"
+    local timeout_sec=10
+    local hide_on_success=0
+	local show_duration=0
+	local post_pause_sec=0
+
+    #if no argument is passed this for loop will be skipped
+    for ((i=0;i<${#opts[@]};i++));do
+        case "${opts[$i]}" in
+            --pid|-p) [[ "${opts[$((i+1))]}" != "" ]] && pid=${opts[$((i+1))]} && ((i++));;
+            --timeout|-t) [[ "${opts[$((i+1))]}" != "" ]] && timeout_sec="${opts[$((i+1))]}" && ((i++));;
+            --label|-l) [[ "${opts[$((i+1))]}" != "" ]] && loading_text="${opts[$((i+1))]}" && ((i++));;
+            --pause-sec) [[ "${opts[$((i+1))]}" != "" ]] && post_pause_sec="${opts[$((i+1))]}" && ((i++));;
+            --pause) post_pause_sec=1;;
+            --no-pause) post_pause_sec=0;;
+            --hide|-h) hide_on_success=1;;
+            --show|-s) hide_on_success=0;;
+            --duration|-d) show_duration=1;;
+            --no-duration) show_duration=0;;
+            *) pid=${opts[$i]};;
+        esac
+    done
+
+    loader_animation $pid "${loading_text}" $timeout_sec $show_duration $hide_on_success $post_pause_sec
 }

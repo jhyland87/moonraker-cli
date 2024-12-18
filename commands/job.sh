@@ -69,7 +69,7 @@ show_job_state() {
 }
 
 job.status (){
-	require_moonraker_connect
+	require_moonraker_api
 
 	# DESCRIPTION: Outputs the status of the current job
 	# SYNTAX: moonraker job status
@@ -79,7 +79,7 @@ job.status (){
 }
 
 job.pause(){
-	require_moonraker_connect
+	require_moonraker_api
 
 	# DESCRIPTION: Pause the current job (if there is one)
 	# SYNTAX: moonraker job pause
@@ -94,7 +94,7 @@ job.pause(){
 }
 
 job.resume(){
-	require_moonraker_connect
+	require_moonraker_api
 
 	# DESCRIPTION: Resumes a paused print job
 	# SYNTAX: moonraker job resume
@@ -108,7 +108,7 @@ job.resume(){
 }
 
 job.cancel(){
-	require_moonraker_connect
+	require_moonraker_api
 
 	local _job_status_output=$(job.status)
 	local _job_status=$(echo "${_job_status_output}" | jq --raw-output '.printer')
@@ -131,7 +131,7 @@ job.cancel(){
 }
 
 job.start(){
-	require_moonraker_connect
+	require_moonraker_api
 
 	# DESCRIPTION: Start a new print job
 	# SYNTAX: moonraker job start <filename>
@@ -146,7 +146,7 @@ job.start(){
 }
 
 job.watch(){
-	require_moonraker_connect
+	require_moonraker_api
 
 	#trap 'screen_restore' SIGINT
 	# DESCRIPTION: Watch job status data
