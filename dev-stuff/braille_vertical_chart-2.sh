@@ -35,7 +35,6 @@ while : ; do
         ./jq/modifiers/chart_data_parser_with_headers.jq | 
         tee -a data.log | 
         ./dev-stuff/braille_vertical_chart_with_headers.awk
-    break
     sleep $loop_sleep_interval
 done
 

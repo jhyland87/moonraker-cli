@@ -15,7 +15,6 @@ BEGIN {
     make_chars("small");
 }
 {   
-    #print "NR:",NR,"FNR:",FNR
     if ( FNR == 1 ){
         for ( idx=1; idx<=NF; idx++ ){
             headers[idx] = $idx;
@@ -28,7 +27,7 @@ BEGIN {
     }
 }
 END {
-    end_char = "𛲃"; 
+    end_char = "⸌"; # ⸌ 𛲃
     horizontal_line_char = "⏉";
     vertical_char = "⏐";
     left_graph_boundary_char = "⎧"; 
@@ -66,11 +65,10 @@ END {
 
         for ( col=1; col<=n; col++){
             if ( length(chart_images[col][_row_idx]) == 0 || chart_images[col][_row_idx] == 0 ){
-                chart_images[col][_row_idx] = "⠀⠀";
+                chart_images[col][_row_idx] = bar_graph_chars[0];
             }
-
             color = percent_to_color(row_idx*4)
-            printf("%s\b\b%s%s", "⠀⠀", color, chart_images[col][_row_idx]);
+            printf("%s\b\b%s%s", bar_graph_chars[0], color, chart_images[col][_row_idx]);
         }
         printf("%20s\n", " ");
     }
@@ -90,7 +88,7 @@ END {
             for ( i=1; i<=5; i++){
                  if ( col_p == i && col == NF-(col_p-1) ){
                     label_color = percent_to_color(chart_data[col]);
-                    printf("\033[38;5;12;2m%2s\033[0m%s %s\033[2;3m%s\033[0m", end_char, to_small(headers[col]), label_color, to_small("("chart_data[col]"%)"));
+                    printf("\033[38;5;12;1m%2s\033[0m%s %s\033[2;3m%s\033[0m", end_char, to_small(headers[col]), label_color, to_small("("chart_data[col]"%)"));
                     break;
                 }
             }
