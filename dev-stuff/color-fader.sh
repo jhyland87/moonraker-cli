@@ -14,7 +14,9 @@ set_color () {
     # placeholder for the command that sets led color on a particular light
     #echo "$light, $red, $green, $blue"
     #echo -e "\x1b[38;2;${red};${green};${blue}m.\e[0m"
-    printf "\e[30m%b%-11s\e[0m\n" "\e[48;2;${red};${green};${blue}m" "${red};${green};${blue}" ;
+    #printf "\e[30m%b%-11s\e[0m\n" "\e[48;2;${red};${green};${blue}m" "${red};${green};${blue}" ;
+    printf "\e[30m%b%-1s\e[0m" "\e[48;2;${red};${green};${blue}m" " " ;
+
     #echo -e "\e[30m\e[48;2;${red};${green};${blue}m${red};${green};${blue}\e[0m"
 }
 
@@ -82,6 +84,7 @@ fade () {
         sleep $sleep
         i=$(($i + $step))
     done
+    echo
     # $red, $green and $blue are global variables and will be available to the
     # caller after this function exits. The values may differ from the input
     # end values if a step other than one is chosen. Because of that, these
@@ -125,6 +128,21 @@ fade () {
 # echo
 # fade one 2 0 253 188 110 165 0 39
 
+fade one 2 0 140 51 0 255 119 41
+
+fade one 2 0 178 150 0 255 227 62
+
+fade one 2 0 0 137 96 83 255 203
+
+fade one 2 0 0 75 175 83 157 225
+
+fade one 2 0 152 0 175 233 91 255
+exit
+# white to yellow
+fade one 8 0 255 255 255 255 249 0
+
+fade one 8 0 255 249 0 255 0 0
+exit
 fade one 1 0 96 150 197 49 54 150
 exit
 #echo "light blue"

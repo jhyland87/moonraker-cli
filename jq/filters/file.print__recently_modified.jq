@@ -1,3 +1,5 @@
+#!/usr/bin/env jq -srf
+
 # 
 # ----
 # curl -s 'http://192.168.0.96:7125/server/files/list?root=gcodes' | 

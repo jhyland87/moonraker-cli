@@ -1,3 +1,5 @@
+#!/usr/bin/env jq -f
+
 # Gogic for gatherng the useful data from the mesh response data
 #
 # read -r mesh_profile algorythm mesh_min mesh_max probed_matrix mesh_matrix mesh_highest mesh_lowest mesh_range std_deviation variance \

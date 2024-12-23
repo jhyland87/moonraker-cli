@@ -190,7 +190,6 @@ _hr() {
 		printf "${char}" 1>&2
 	done
 	echo -e "${_none_}"
-	#echo;
 }
 
 _decolor(){
@@ -208,12 +207,12 @@ _decolor(){
 }
 
 screen_restore(){
+	tput clear
 	echo "Restoring screen..." 
-	sleep 1
+	sleep 0.5
 	stty echoctl
 	stty echo
 	tput cnorm
-	tput clear
 
 	# rmcup - Remove Memory CUrsor Positon
 	tput rmcup
@@ -231,12 +230,8 @@ screen_restore(){
 # 	temp_terminal
 # 	while true; do moonraker print status; sleep 1; done
 temp_terminal(){
-	trap 'screen_restore' SIGINT
-	#trap 'screen_restore' SIGSTOP
-	#trap 'screen_restore' SIGQUIT
-	#trap 'screen_restore' SIGKILL
-	#trap 'screen_restore' SIGTRAP
-	#trap 'screen_restore' SIGTERM
+	trap 'screen_restore' SIGINT SIGTERM SIGQUIT
+	trap "" SIGTSTP
 
 	# smcup - Save Memory CUrsor Positon
 	tput smcup
@@ -244,8 +239,6 @@ temp_terminal(){
 	stty -echo
 	tput civis
 }
-
-
 
 # Check if a given string (first param) is in the remaining value(s)
 #   declare -a myarray=(foo bar baz)
@@ -294,7 +287,6 @@ _h2(){
 _h3(){
 	echo -e "${_h3_}$@${_none_}\n"
 }
-
 
 json2table(){
 	jq --monochrome-output --raw-output \

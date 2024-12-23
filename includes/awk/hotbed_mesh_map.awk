@@ -115,7 +115,7 @@ END {
     #                 1  1  1
     #  1  2  3 ... 9  0  1  2 ...
     if ( length(COL_COUNT) > 1 ){
-        go2col(grid_start_indent);
+        go_to_col(grid_start_indent);
         for ( i = 0; i<=(COL_COUNT-1); i++){
             col_num = i;
             if ( length(col_num) > 1 ){
@@ -130,7 +130,7 @@ END {
     }
 
     # Print second row in X axis coordinate rows, if any double digit cols are found
-    go2col(grid_start_indent);
+    go_to_col(grid_start_indent);
 
     for ( i = 0; i<=(COL_COUNT-1); i++){
         col_num = i;
@@ -152,7 +152,7 @@ END {
             # Print the Y axis coordinates on the first row then every other row after that.
             if ( col == 1 && (row %2 == 0 || row == length(results)) ){
                 printf("%s%2s\033[0m", colors["xy"], to_superset(row_idx_display));
-                go2col(grid_start_indent);
+                go_to_col(grid_start_indent);
                 row_idx_display++;
             }
 
@@ -213,7 +213,7 @@ END {
                 gradient_scale_cursor = gradient_scale_cursor + negative_gradient_scale_spacing;
             }
 
-            go2col(32);
+            go_to_col(32);
             if ( row_idx_display == 1 ){
                 printf("\033[38;2;%s;48;2;%sm%s%s\033[0m %s\n", bottom_color, top_color, block["lower"], block["lower"], to_superset(trim_gradient(float(gradient_scale_cursor))));
             }
@@ -231,12 +231,12 @@ END {
             }
         }
         else if (row == length(results)) {
-            go2col(32);
+            go_to_col(32);
             printf("\033[38;2;%sm%s%s\033[0m %s\n", mesh_val_to_color(results[row][col]),  block["upper"], block["upper"],  to_superset(trim_gradient(min_value)));
         }
     }
 
     # Logic to show the X coordinates and arrows
-    go2col(10);
+    go_to_col(10);
     printf("%s%-3s %s %3s%s\n", colors["coordinates"], coordinates["left"], coordinates["X"], coordinates["right"], "\033[0m");   
 }

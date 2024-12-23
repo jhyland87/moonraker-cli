@@ -48,7 +48,7 @@ bed.mesh(){
 	#_get /printer/objects/query 'bed_mesh' | jq --monochrome-output > "${TMP_DIR}/bed_mesh.tmp.json"
 
 	read -r mesh_profile algorythm mesh_min mesh_max probed_matrix mesh_matrix mesh_highest mesh_lowest mesh_range std_deviation variance \
-		<<< $(jq -f jq/filters/bed.mesh__mesh_data.jq --raw-output "${TMP_DIR}/bed_mesh.tmp.json");
+		<<< $(./jq/filters/bed.mesh__mesh_data.jq --raw-output "${TMP_DIR}/bed_mesh.tmp.json");
 
 	if [[ $? -ne 0 ]]; then
 		_error "Failed to parse bed mesh response with jq";

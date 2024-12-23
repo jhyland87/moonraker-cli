@@ -1,3 +1,5 @@
+#!/usr/bin/env jq -f
+
 def bbytes:
   def _bbytes(v; u):
     if (u | length) == 1 or (u[0] == "" and v < 10240) or v < 1024 then
@@ -51,4 +53,28 @@ def calc_variance(population):
 # float_to_int(215.0) == "215"
 def float_to_int(num):
   . | num | tonumber | floor | tostring;
+
+
+
+def objectArray2CSV:
+  . | 
+    (if type != "array" 
+      then error("root needs to be an array") 
+    end) |
+    (if (.[0] | type != "object") 
+      then error("first array entry is not an object") 
+    end) |
+    (.[0] | to_entries | map(.key)) as $column_names |
+    (if length == 0 
+      then halt
+    end) |
+    ( $column_names | map(ascii_upcase) ),
+    (.[] |
+      select(type == "object") |
+      to_entries |
+      [.[] | select(.key| in_array($column_names[]) )] |
+      map(.value)
+    ) | @tsv;
+    #if ($ARGS.named | has("output")) and $ARGS.named["output"] == "tsv" then @tsv else @csv end
+
 

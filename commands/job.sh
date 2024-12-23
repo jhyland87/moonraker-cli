@@ -185,7 +185,7 @@ show_cpu_usage(){
 	local tmp_filename="$TMP_DIR/${1:-proc_stats.json}"
 
 	echo "CPU Usage"
-	jq --from-file jq/filters/machine.proc_stats__cpu_usage.jq "$tmp_filename" | jp  -xy "..[time,cpu_usage]" -type line -width 100 -height 20
+	jq ./jq/filters/machine.proc_stats__cpu_usage.jq "$tmp_filename" | jp  -xy "..[time,cpu_usage]" -type line -width 100 -height 20
 }
 
 show_proc_stats_chart(){

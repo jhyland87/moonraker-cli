@@ -1,3 +1,5 @@
+#!/usr/bin/env jq -srf
+
 # DESCRIPTION: 
 # 	Will take an array of similar basic objects like:
 #   	[

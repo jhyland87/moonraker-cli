@@ -1,3 +1,5 @@
+#!/usr/bin/env jq --from-file 
+
 # DESCRIPTION:
 #   Formats the arguments provided to jq into a websocket friendly payload.
 #
