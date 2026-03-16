@@ -34,7 +34,7 @@ watch.help() {
 
 _debug "Arguments: $# - $*"
 
-require_moonraker_api
+#require_moonraker_api
 
 #subcmd="${1:-help}"
 #subcmd_fn="${__module_name}.${subcmd}"
@@ -49,6 +49,8 @@ temp_terminal
 term_width=`tput cols`
 term_lines=`tput lines`
 
+
+export CACHE_MOONRAKER_CONNECT_STATUS=1
 while true; do
 	if [[ `tput cols` -ne ${term_width} || `tput lines` -ne ${term_lines} ]]; then
 		term_width=`tput cols`
@@ -56,7 +58,7 @@ while true; do
 		tput clear
 	fi
 	tput cup 0 0
-	eval moonraker ${@@Q}
+	eval moonraker -c ${@@Q}
 	sleep 1;
 done
 

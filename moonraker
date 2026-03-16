@@ -26,8 +26,11 @@ source ${CLI_DIR}/includes/connect.sh
 #source ${CLI_DIR}/includes/prompts.sh
 
 
-require_moonraker_ping
-require_moonraker_api
+# Some commands don't need the connection verification _before_ running,
+# (eg: status wakeup), so just execute it for the commands that do within
+# the command function
+#require_moonraker_ping
+#require_moonraker_api
 
 # Global r/w integer settings
 declare -igx LOG_LEVEL=${LOG_LEVEL:=1} MOONRAKER_TIMEOUT
@@ -36,11 +39,30 @@ declare -igx LOG_LEVEL=${LOG_LEVEL:=1} MOONRAKER_TIMEOUT
 declare -rx MOONRAKER_HOST MOONRAKER_PORT MOONRAKER_PROTO \
 			LOG_FORMAT=${LOG_FORMAT:-'%21s| %8s: %s\n'}
 
+export CACHE_MOONRAKER_CONNECT_STATUS=0
+OPTSTRING=":c"
+
+while getopts ${OPTSTRING} opt; do
+  case ${opt} in
+    c)
+      export CACHE_MOONRAKER_CONNECT_STATUS=1
+	  shift
+      ;;
+    # b)
+    #   echo "Option -b was triggered."
+    #   ;;
+    # ?)
+    #   echo "Invalid option: -${OPTARG}."
+    #   exit 1
+    #   ;;
+  esac
+done
+
 
 [[ ! ${MOONRAKER_HOST} ]] && _error "No MOONRAKER_HOST defined - please define this in the settings file" 1
 
-declare -rgx API_HOST="${MOONRAKER_PROTO:-http}://${MOONRAKER_HOST}:${MOONRAKER_PORT:-7125}"
-_debug "API_HOST set to ${API_HOST}"
+declare -rgx MOONRAKER_API_BASE="${MOONRAKER_PROTO:-http}://${MOONRAKER_HOST}:${MOONRAKER_PORT:-7125}"
+_debug "MOONRAKER_API_BASE set to ${MOONRAKER_API_BASE}"
 
 declare -gr CURL_BIN=$(type -p curl; exit $?)
 [[ $? != 0 ]] && _error "No curl binary found - Install with brew" 1
@@ -63,13 +85,13 @@ _rpc(){
 	local _data="${3}"
 
 	if [[ ! $_data ]]; then
-		curl ${API_HOST} \
+		curl ${MOONRAKER_API_BASE} \
 			--request ${_type^^} \
 		  	--request-target $_target \
 		  	--connect-timeout ${MOONRAKER_TIMEOUT:-5} \
-		  	--silent 
+		  	--silent
 	else
-		curl ${API_HOST} \
+		curl ${MOONRAKER_API_BASE} \
 		  	--request GET \
 		  	--request-target "${1?-No request target provided}" \
 		  	--connect-timeout ${MOONRAKER_TIMEOUT:-5} \
@@ -78,49 +100,49 @@ _rpc(){
 	fi
 }
 
-# # HTTP GET 
+# # HTTP GET
 # _get(){
-# 	_rpc GET "${1?-No request target provided}" "${2}" 
+# 	_rpc GET "${1?-No request target provided}" "${2}"
 # }
 
 # _post(){
-# 	_rpc POST "${1?-No request target provided}" "${2}" 
+# 	_rpc POST "${1?-No request target provided}" "${2}"
 # }
 
 # _delete(){
-# 	_rpc DELETE "${1?-No request target provided}" "${2}" 
+# 	_rpc DELETE "${1?-No request target provided}" "${2}"
 # }
 
 
 
 _get() {
 	if [[ ! $2 ]]; then
-		curl ${API_HOST} \
+		curl ${MOONRAKER_API_BASE} \
 		  --request GET \
 		  --request-target "${1?-No request target provided}" \
 		  --connect-timeout ${MOONRAKER_TIMEOUT:-5} \
-		  --silent 
+		  --silent
 	else
-		curl ${API_HOST} \
+		curl ${MOONRAKER_API_BASE} \
 		  --request GET \
 		  --request-target "${1?-No request target provided}" \
 		  --connect-timeout ${MOONRAKER_TIMEOUT:-5} \
 		  --silent \
-		  --data "${2}" 
+		  --data "${2}"
 	 fi
 
 	  #'webhooks&virtual_sdcard&print_stats'
 }
 
-# HTTP GET 
+# HTTP GET
 _post() {
 	if [[ ! $2 ]]; then
-		curl ${API_HOST} \
+		curl ${MOONRAKER_API_BASE} \
 		  --request POST \
 		  --request-target "${1?-No request target provided}" \
 		  --silent
 	else
-		curl ${API_HOST} \
+		curl ${MOONRAKER_API_BASE} \
 		  --request POST \
 		  --request-target "${1?-No request target provided}" \
 		  --silent \
@@ -128,15 +150,15 @@ _post() {
 	fi
 }
 
-# HTTP DELETE 
+# HTTP DELETE
 _delete() {
 	if [[ ! $2 ]]; then
-		curl ${API_HOST} \
+		curl ${MOONRAKER_API_BASE} \
 		  --request DELETE \
 		  --request-target "${1?-No request target provided}" \
 		  --silent
 	else
-		curl ${API_HOST} \
+		curl ${MOONRAKER_API_BASE} \
 		  --request POST \
 		  --request-target "${1?-No request target provided}" \
 		  --silent \
@@ -156,7 +178,7 @@ if [[ -e ./config/aliases.cfg ]]; then
 		# _cmd=$(echo "${line}" | cut -d '=' -f 2 | tr -d '"')
 		# _subcmd=$(echo "${line}" | cut -d '=' -f 3 | tr -d '"')
 		# _params=$(echo "${line}" | cut -d '=' -f 3- | tr -d '"')
-		
+
 		command_aliases[$_alias]=$_cmd
 		_debug "Added alias $_alias for $_cmd"
 	done <<< $(grep -EO '^[a-z]+="?[a-z ]+"?$' ./config/aliases.cfg)
@@ -178,7 +200,7 @@ if [[ ${command_aliases[${execcmd}]} ]]; then
 	alias_cmd=${command_aliases[${execcmd}]}
 	cmd=$(echo "${alias_cmd}" | awk '{print $1}')
 	params=$(echo "${alias_cmd}" | cut -d ' ' -f 2-)
-	
+
 	# Moify the CLI params, switching the out with the new ones.
 	set -- "${@:2}" "${cmd}" "${@:4}" ${params}
 
@@ -189,5 +211,5 @@ shift
 
 test -f "${CLI_DIR}/commands/${execcmd}.sh" || _error "No subcommand found for ${execcmd}" 1
 
-#export -p 
+#export -p
 eval ${CLI_DIR}/commands/${execcmd}.sh ${*@Q}

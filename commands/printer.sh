@@ -48,7 +48,7 @@ show_printer_state() {
 
 	_get /api/printer | jq
 	return
-	curl ${API_HOST} \
+	curl ${MOONRAKER_API_BASE} \
 		--request-target /api/printer \
 		--request GET --silent |
 			jq 

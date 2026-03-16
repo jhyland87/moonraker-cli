@@ -12,7 +12,7 @@ __module_file=$(basename ${__module_path}) # file.sh
 __module_name=${__module_file%%.sh} # file
 __moonraker_base_dir=$(realpath "${__module_dir}/../")
 
-#[[ -z ${API_HOST} ]] && _err "No ${API_HOST} found" 1
+#[[ -z ${MOONRAKER_API_BASE} ]] && _err "No ${MOONRAKER_API_BASE} found" 1
 
 #TEMP=$(getopt -o hl: --long help,list: \
 #	        	-n 'wtf' -- "$@")

@@ -28,14 +28,16 @@ temp_terminal
 
 while : ; do
     tput cup 0 0
+		#printf '\e]11;#ffffff\a'
     curl http://192.168.0.96:4408/machine/system_info http://192.168.0.96:4408/machine/proc_stats http://192.168.0.96:4408/printer/objects/query \
         --get --silent \
         --data print_stats --data virtual_sdcard --data temperature_sensor%20mcu_temp \
-        --data display_status --data system_stats --data mcu --data mcu%20rpi | 
-        ./jq/modifiers/chart_data_parser_with_headers.jq | 
-        tee -a data.log | 
+        --data display_status --data system_stats --data mcu --data mcu%20rpi |
+        ./jq/modifiers/chart_data_parser_with_headers.jq |
+        tee -a data.log |
         ./dev-stuff/braille_vertical_chart_with_headers.awk
     sleep $loop_sleep_interval
 done
 
+restore_terminal
 echo

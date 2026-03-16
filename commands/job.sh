@@ -17,8 +17,8 @@ __module_name=${__module_file%%.sh} # file
 __moonraker_base_dir=$(realpath "${__module_dir}/../")
 
 
-#[[ -z ${API_HOST} ]] && _error "No ${API_HOST} found" 1
-#echo "API_HOST: ${API_HOST}"
+#[[ -z ${MOONRAKER_API_BASE} ]] && _error "No ${MOONRAKER_API_BASE} found" 1
+#echo "MOONRAKER_API_BASE: ${MOONRAKER_API_BASE}"
 
 
 # Note the quotes around '$TEMP': they are essential!
@@ -62,7 +62,7 @@ DEBUG=false
 show_job_state() {
 	local limit="${1:-20}"
 
-	curl ${API_HOST} \
+	curl ${MOONRAKER_API_BASE} \
 		--request-target /api/printer \
 		--request GET --silent |
 			jq 

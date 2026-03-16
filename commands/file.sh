@@ -45,9 +45,9 @@ file.help(){
 	#exit
 }
 
-[[ $# -eq 0 ]] && exit
+[[ $# -eq 0 ]] && set -- help
 [[ $1 == 'description' ]] && eval ${__module_name}.description && exit
-[[ $1 == 'help' ]] && eval ${__module_name}.help && exit 
+[[ $1 == 'help' ]] && eval ${__module_name}.help && exit
 
 
 is_printing() {
@@ -72,7 +72,7 @@ file.list(){
 
 	#_get /server/files/list "root=${root_folder}" | jq -L '../jq/' 'include "utils"; [.result[] | {path: .path, modified_ts:.modified, modified_date: (.modified|todate), size: (.size|bytes), permissions: .permissions}] | sort_by(.modified_ts) | reverse'
 
-	_get /server/files/list 'root=gcodes' | 
+	_get /server/files/list 'root=gcodes' |
 		jq \
 			--monochrome-output \
 			--raw-output \
@@ -84,8 +84,8 @@ file.list(){
 file.print(){
 	require_moonraker_api
 
-	is_printing && 
-		echo "There is already a print in progress. You can cancel this print (moonraker print cancel) or wait for it to finish" 1>&2 && 
+	is_printing &&
+		echo "There is already a print in progress. You can cancel this print (moonraker print cancel) or wait for it to finish" 1>&2 &&
 		return 1
 
 	local gcode_filename=${1}
@@ -103,9 +103,9 @@ file.print(){
 				--from-file ./jq/filters/file.print__recently_modified.jq  \
 				--arg limit 10 \
 				--arg sort_by modified |
-				jq --raw-output '.[].name' | sed -E -e 's/ /\\ /g' | 
+				jq --raw-output '.[].name' | sed -E -e 's/ /\\ /g' |
 				while read line; do
-					printf "%b%-85s%b\n" "${_olivedrab_}" "${line}" "\e[0m"; 
+					printf "%b%-85s%b\n" "${_olivedrab_}" "${line}" "\e[0m";
 				done)
 
 		  # Capture any ctrl + x to allow the function to be aborted
@@ -113,7 +113,7 @@ file.print(){
 	    trap 'echo -e "\033[0m\n\nCaptured SIGINT - quitting file.print"; trap - SIGINT; return 1' SIGINT
 
 	    # Allow the destination folder to be selected from the list of folders
-	    # found in stl_folders and stored in dest_dirs 
+	    # found in stl_folders and stored in dest_dirs
 	    select file_name in ${gcode_file_list[@]} ; do
 	        for r in $REPLY ; do
 	            gcode_filename=${gcode_file_list[r - 1]}
@@ -132,8 +132,8 @@ file.print(){
 	    gcode_filename=$(_decolor "${gcode_filename}")
 	fi
 
-	[[ ! ${gcode_filename} ]] && 
-		echo "No file seleted to print" 1>&2 && 
+	[[ ! ${gcode_filename} ]] &&
+		echo "No file seleted to print" 1>&2 &&
 		return 1
 
 	echo -n "Printing ${gcode_filename}... "
@@ -158,8 +158,8 @@ file.delete(){
 	fi
 
 	# Confirmation prompt, if necessary
-	[[ $force != false ]] || 
-		confirm_action "Are you sure you want to delete $# file(s)?" || 
+	[[ $force != false ]] ||
+		confirm_action "Are you sure you want to delete $# file(s)?" ||
 		return 1
 
 	#echo "Deleting ${#file_list[@]} file(s): ${file_list[@]}"
@@ -196,7 +196,7 @@ shift
 
 # Make sure the sumcommand is a defined function
 if [[ $(type -t "${subcmd_fn}") != 'function' ]]; then
-	_error "The command ${subcmd} is not a valid subcommand for ${__module_name}" 
+	_error "The command ${subcmd} is not a valid subcommand for ${__module_name}"
 	exit 2
 fi
 

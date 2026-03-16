@@ -17,8 +17,8 @@ function loader_animation {
         local end=${1:-80}
         local str="${2:-=}"
         local range=$(seq $start $end)
-        for i in $range ; 
-            do echo -n "$str"; 
+        for i in $range ;
+            do echo -n "$str";
         done
     }
 
@@ -60,8 +60,8 @@ function loader_animation {
                 [[ $elipses -gt 3 ]] && elipses=1
             fi
 
-            [[ $delta_ts -gt $timeout_sec ]] && 
-                loading_txt="Failed to load after ${timeout_sec} seconds" && 
+            [[ $delta_ts -gt $timeout_sec ]] &&
+                loading_txt="Failed to load after ${timeout_sec} seconds" &&
                 return_code=2 &&
                 color_idx=$((${#colors[@]}-1))
         fi
@@ -71,31 +71,31 @@ function loader_animation {
 
         # If the process has closed, then we can exit the loop
         if [[ $loading_proc_status -eq 1 ]]; then
-            [[ $clear_status_on_success -ne 1 ]] && 
-                echo && 
+            [[ $clear_status_on_success -ne 1 ]] &&
+                echo &&
                 break;
 
             term_width=$(tput cols);
 
             # If clear_status_on_success is enabled, then clear the loading animation line and return
-            # the carrage. 
-            [[ $clear_status_on_success -eq 1 ]] && 
+            # the carrage.
+            [[ $clear_status_on_success -eq 1 ]] &&
                 printf "\r%${term_width}s\r" " " &&
                 break;
         fi
 
 
         # Or if we've timed out
-        [[ $delta_ts -gt $timeout_sec ]] && 
-            echo && 
+        [[ $delta_ts -gt $timeout_sec ]] &&
+            echo &&
             break;
 
         let idx++
         let total_iterations++
 
         # Every 5th iteration, increment the color_idx
-        [[ $(($total_iterations % $update_increment)) -eq 0 ]] && 
-            [[ $color_idx -lt $((${#colors[@]}-1)) ]] && 
+        [[ $(($total_iterations % $update_increment)) -eq 0 ]] &&
+            [[ $color_idx -lt $((${#colors[@]}-1)) ]] &&
             let color_idx++
 
         [[ $idx -eq ${#patterns_large[@]} ]] && idx=0
@@ -127,12 +127,16 @@ function loader {
     loader_animation $pid "${display_txt}" $timeout_sec $hide_on_success
 }
 
-# nohup sleep 5 & 
+# nohup sleep 5 &
 # loader $! -label "Sleepy" -timeout 12 -hide && echo "Sleep is done"
 # exit
 
 nohup curl 'http://192.168.0.96:7125/server/history/list' --silent --output ./tmp/history.json 2>/dev/null &
-loader $! -label "Loading printer history" -timeout 12 -hide && echo "Successfully downloaded history"
+loader $! \
+	-label "Loading printer history" \
+	-timeout 12 \
+	-hide &&
+	echo "Successfully downloaded history"
 
 exit
 

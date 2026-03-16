@@ -36,8 +36,8 @@ history.help() {
 [[ $1 == 'help' ]] && eval ${__module_name}.help && exit
 
 
-#[[ -z ${API_HOST} ]] && _error "No ${API_HOST} found" 1
-#echo "API_HOST: ${API_HOST}"
+#[[ -z ${MOONRAKER_API_BASE} ]] && _error "No ${MOONRAKER_API_BASE} found" 1
+#echo "MOONRAKER_API_BASE: ${MOONRAKER_API_BASE}"
 
 
 

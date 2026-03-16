@@ -17,27 +17,39 @@ function check_server_ping {
 }
 
 function require_moonraker_http {
+	[[ $CACHE_MOONRAKER_CONNECT_STATUS == 1 ]] && return
 	check_moonraker_http &>/dev/null &
 	local _pid=$!
-	loader --pid $_pid --label "Checking moonraker HTTP response" --timeout 10 --hide
+	loader --hide \
+		--pid $_pid \
+		--label "Checking moonraker HTTP response" \
+		--timeout 10
 	wait $_pid
 	local _ret=$?
 	test $_ret != 0 && _fatal "Unable to connect to moonraker HTTP server" && exit $_ret
 }
 
 function require_moonraker_api {
+	[[ $CACHE_MOONRAKER_CONNECT_STATUS == 1 ]] && return
 	check_moonraker_api &>/dev/null &
 	local _pid=$!
-	loader --pid $_pid --label "Checking moonraker API port" --timeout 10 --hide 
+	loader --hide \
+		--pid $_pid \
+		--label "Checking moonraker API port" \
+		--timeout 10
 	wait $_pid
 	local _ret=$?
 	test $_ret != 0 && _fatal "Unable to connect to moonraker API port" && exit $_ret
 }
 
 function require_moonraker_ping {
+	[[ $CACHE_MOONRAKER_CONNECT_STATUS == 1 ]] && return
 	check_server_ping &>/dev/null &
 	local _pid=$!
-	loader --pid $_pid --label "Checking moonraker ping" --timeout 10 --hide
+	loader --hide \
+		--pid $_pid \
+		--label "Checking moonraker ping" \
+		--timeout 10
 	wait $_pid
 	local _ret=$?
 	test $_ret != 0 && _fatal "Unable to ping moonraker server" && exit $_ret

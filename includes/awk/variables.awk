@@ -6,25 +6,30 @@ BEGIN {
     # Where to start the grid - The numbers will show before this.
     grid_start_indent = 3;
 
-    char_set["superset"] = "⁰¹²³⁴⁵⁶⁷⁸⁹⁻⁺᠂⁼⁽⁾﹪ˡˢˣʰᵐᵒⁱʲʳʷʸᵍ";
-    char_set["subset"] = "₀₁₂₃₄₅₆₇₈₉₋₊․₌₍₎﹪ₗₛₓₕₘₒᵢjrwyg";
+    char_set["superset"] = "⁰¹²³⁴⁵⁶⁷⁸⁹ᴬᵃᴮᵇCcᴰᵈᴱᵉFfᴳᵍᴴhᴵɩᴶjᴷᵏᴸɩᴹᵐᴺᵑᴼᵒᴾᵖQqᴿrSsᵀᵗᵁᵘVᵛᵂᵚXᵡYyZz⁻⎼⁺᠂⁼⁽⁾﹪᠄⸌⸍";
+
+
+    char_set["subset"] = "₀₁₂₃₄₅₆₇₈₉ᴀₐʙbᴄcᴅdᴇₑꜰfɢgʜₕɪₗᴊjᴋₖʟₗᴍₘɴₙᴏₒᴘₚꞯqʀrꜱₛᴛₜᴜuᴠvᴡwXxʏyZᴢ₋_₊․₌₍₎﹪܄⸜⸝"
     #ₒₓₕₖₘₙₚₜ
-    char_set["normal"] = "0123456789-+.=()%lsxhmoijrwyg";
+    #char_set["normal"] = "0123456789-+.=()%lsxhmoiTZjrwyg";
+    char_set["normal"] = "0123456789AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz-_+.=()%:\\/";
 
     # ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏ
     # ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘꞯʀꜱᴛᴜᴠᴡXʏᴢ
     # ﹕﹖﹗﹘﹙﹚﹛﹜﹟﹠﹡﹢﹣﹤﹥﹦﹨﹩﹪﹫
     #ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘꞯʀꜱᴛᴜᴠᴡʏᴢ﹕﹖﹗﹙﹚﹛﹜﹟﹠﹡﹢﹣﹤﹥﹦﹨﹩﹪﹫
     # ᵃᵇᶤᶥ
-    char_set["sm_normal"] = "ABCDEFGHIJKLMNOPQRSTUVWYZabcdefghijklmnoqrstuvwxyz0123456789:?!(){}#&*+-<>=\\$%@";
-    char_set["small"] = "ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘꞯʀꜱᴛᴜᴠᴡʏᴢᵃᵇᶜᵈᵉᶠᵍʰᶥʲᵏᶩᵐᶮᵒᵖʳˢᵗᵘᵛʷˣʸᶻ₀₁₂₃₄₅₆₇₈₉﹕﹖﹗₍₎﹛﹜﹟﹠﹡﹢﹣﹤﹥﹦﹨﹩﹪﹫";
+    char_set["sm_normal"] = "ABCDEFGHIJKLMNOPQRSTUVWYZabcdefghijklmnoqrstuvwxyz0123456789?!(){}#&*+-_<>=$%@:";
+    char_set["small"] = "ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘꞯʀꜱᴛᴜᴠᴡʏᴢᵃᵇᶜᵈᵉᶠᵍʰᶥʲᵏᶩᵐᶮᵒᵖʳˢᵗᵘᵛʷˣʸᶻ₀₁₂₃₄₅₆₇₈₉﹖﹗₍₎﹛﹜﹟﹠﹡﹢–⎽﹤﹥﹦﹩﹪﹫܃";
+    #﹘ ‒ – ︲
+    #﹕ ᠄ ܃ ˸ ܄
 
     block["upper"] = "\u2580"; # ▀
-    block["lower"] = "\u2584"; # ▄ 
+    block["lower"] = "\u2584"; # ▄
     block["full"]  = "\u2588"; # █
 
     # upper_half_block="\u2580" # ▀
-    # lower_half_block="\u2584" # ▄  
+    # lower_half_block="\u2584" # ▄
     # full_block="\u2588\u2588" # █
 
     coordinates["up"] = "\u2B06"; # ⬆
@@ -55,4 +60,19 @@ BEGIN {
     bar_graph_chars[3] = "⣶⡆";
     bar_graph_chars[4] = "⣶⡆";
     bar_graph_chars[5] = "⣿⡇";
-} 
+
+    # Todo: use the braille symbols that would show incrementation better.
+    # eg: ⡀⣀⣄⣤⣦⣶⣷⣿
+    # bar_graph_chars[0] = "⠀";
+    # bar_graph_chars[1] = "⡀";
+    # bar_graph_chars[2] = "⣀";
+    # bar_graph_chars[3] = "⣄";
+    # bar_graph_chars[4] = "⣤";
+    # bar_graph_chars[5] = "⣦";
+    # bar_graph_chars[6] = "⣶";
+    # bar_graph_chars[7] = "⣷";
+    # bar_graph_chars[8] = "⣿";
+
+
+
+}

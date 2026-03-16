@@ -293,7 +293,7 @@ function restore_cursor(){
 # NOT WORKING YET
 function get_cursor_pos_x(arr){
     #cmd = "IFS=\";\" read -sdRr -p $\"\033[6n\" ROW COL; echo ${ROW#$\"\033\"[}\":\"${COL#$\"\033\"[};"
-    cmd = "IFS=';' read -s -p $'\033[6n' ROW COL; echo \"${ROW#$'\033'[}:${col#$'\033'[}\"";
+    cmd = "IFS=';' read -sdR -p $'\033[6n' ROW COL; echo ${ROW#$'\033'[}:${COL#$'\033'[}";
     cmd | getline cursor_pos;
     close(cmd);
     split(cursor_pos, arr, " ");
@@ -301,15 +301,44 @@ function get_cursor_pos_x(arr){
     printf("%s - \n\tX:%d; Y:%d\n", cursor_pos, arr[1], arr[2]);
 }
 
-# NOT WORKING YET
+# Get cursor position
+# gawk --include ./includes/awk/functions.awk 'BEGIN{ print get_cursor_pos()}'
+# 21;1
+# printf "\t\t\t"; gawk --include ./includes/awk/functions.awk 'BEGIN{ print get_cursor_pos()}'
+# 21;25
 function get_cursor_pos(arr){
-    cmd = "IFS=\";\" read -sdR -p $\"\033[6n\"  ROW COL; echo ${ROW#$\"\033\"[}\":\"${COL#$\"\033\"[};";
-    cmd | getline cursor_pos;
+    cmd = "IFS=';' read -sdR -p $'\033[6n' POS; echo  ${POS#$'\033'[}";
+    cmd | getline read_output;
     close(cmd);
-    print("cursor_pos:",cursor_pos);
-    split(cursor_pos, arr, ":");
+
+    split(read_output, arr, ";")
+    # print "read_output:",read_output
+    # print "arr[1]:",arr[1]
+    # print "arr[2]:",arr[2]
+    return read_output
 }
 
+
+# BROKEN!.... Do not use 
+# This is failing to separate the input data from the command and the input data that's
+# going to the awk program from the bash script.
+function get_cur_pos(){
+    tempfile = ("mydata." PROCINFO["pid"])
+
+    cmd = "IFS=';' read -srdR -p $'\033[6n' POS; echo  ${POS#$'\033'[} > foobar";
+
+    cmd | getline x; print x
+    #while (not done with data)
+    #cmd | ("tee " tempfile)
+    #close("tee " tempfile)
+
+#print "tempfile:",tempfile
+    # # Read the results, remove tempfile when done
+    # while ((getline newdata < tempfile) > 0)
+    #    print newdata
+    # close(tempfile)
+    # system("rm " tempfile)
+}
 # Move cursor to a specific spot on the screen
 function move_cursor(x, y, output_str){
     # - Position the Cursor:
@@ -331,6 +360,18 @@ function move_cursor(x, y, output_str){
     if ( length(output_str) > 0 ){
         printf("%s", output_str);
     }
+}
+
+function hide_cursor(){
+    printf("\033[?25l");
+}
+
+function show_cursor(){
+    printf("\033[?25h");
+}
+
+function clear_screen(){
+    printf("\033c")
 }
 
 function clear_to_eol(){
@@ -396,6 +437,9 @@ function _rmline(){
     printf("\033[M");
 }
 
+function _printscreen(){
+    printf("\033[25i");
+}
 function title(title_val){
     printf("\033]0;%s\007", title_val);
 }
@@ -409,7 +453,8 @@ function update_timestamp(){
     save_cursor();
     ts = get_timestamp();
     move_cursor(0, terminal_cols() - length(ts));
-    printf(ts);
+    printf(to_small(ts));
+    #printf("%s - %s", "Tester",to_superset("Tester"))
     restore_cursor();
 }
 

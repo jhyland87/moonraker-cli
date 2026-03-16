@@ -16,7 +16,6 @@ include "./jq/utils";
     | .mcu.mcu_stats.last_stats = .moonraker_stats[-2]
     | .mcu.mcu_stats.current_stats = .moonraker_stats[-1]
     | .cpu_time_change = (.eventtime-.status.system_stats.cputime * 100)
-    
     | .system_stats = .status.system_stats
     | [.system_info.cpu_info, .status.system_stats, .system_cpu_usage, .mcu] 
     | .[0] * .[1] * .[2] * .[3]  
@@ -30,9 +29,8 @@ include "./jq/utils";
     #   const mem_used = total_memory - stats.memavail
     #   const percent_mem_used = Math.ceil(mem_used / total_memory * 100)
     | [{
-        #"MEM": ((100/.total_memory)*.memused | floor),
-        "mem": ((.memused/.total_memory)*100 | floor),
-        "load": ((.sysload/.cpu_count)*100 | floor),
+        "mem": (.memused / .total_memory * 100 | floor),
+        "load": (.sysload / .cpu_count * 100 | floor),
         "cpu": .cpu
       }]
     | objectArray2CSV
