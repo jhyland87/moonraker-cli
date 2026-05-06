@@ -246,6 +246,10 @@ temp_terminal(){
 
 }
 
+get_term_width() {
+	tput cols
+}
+
 bare_terminal(){
 
   trap 'restore_terminal' SIGINT SIGTERM SIGQUIT

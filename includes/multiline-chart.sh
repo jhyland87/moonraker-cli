@@ -1,22 +1,23 @@
 #!/usr/bin/env bash
-# chart.sh - Terminal line chart using Unicode box-drawing characters
+# multiline-chart.sh - Terminal multi-series line chart using Unicode box-drawing characters
 #
-# Reads a JSON array of {time, value} objects from stdin and renders
-# a clean line chart using: ┤ ┼ ╶ ─ ╰ ╭ ╮ ╯ │
+# Renders multiple data series on a single chart with colored lines and a legend.
+# Each series is specified via a -s flag pointing to a JSON file of [{time, value}, ...].
 #
 # Usage:
-#   echo "$json_data" | chart.sh [options]
+#   multiline-chart.sh [options] -s "Name,color,file" [-s "Name2,color2,file2" ...]
 #
 # Parameters:
 #   -height      Chart height in rows (default: terminal height / 2 - 3)
 #   -width       Chart width in columns (default: terminal width - 5)
 #   -timefmt     Time format: "HH:MM:SS" (default), "MM:SS", or "HH:MM"
-#   -line-color  Color of the chart line (default: none)
 #   -label-color Color of y-axis value labels (default: none)
 #   -time-color  Color of x-axis timestamp labels (default: none)
-#   -axis-color  Color of axis lines ┤┼─ (default: none)
+#   -axis-color  Color of axis lines and legend border (default: none)
 #   -min         Force minimum y-axis value (default: auto from data)
 #   -max         Force maximum y-axis value (default: auto from data)
+#   -no-legend   Suppress the inline legend box (default: legend shown)
+#   -s           Series: "Name,color,filepath" (repeatable)
 #
 # Supported colors:
 #   black, red, green, yellow, blue, magenta, cyan, white,
@@ -31,27 +32,45 @@ _term_lines=$(( $(tput lines 2>/dev/null || echo 40) / 2 - 3 ))
 height="${_term_lines}"
 width="${_term_cols}"
 timefmt="HH:MM:SS"
-line_color=""
 label_color=""
 time_color=""
 axis_color=""
 y_min=""
 y_max=""
+show_legend=1
+
+# Series arrays
+declare -a series_names=()
+declare -a series_colors=()
+declare -a series_files=()
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
         -height)      height="$2";      shift 2 ;;
         -width)       width="$2";       shift 2 ;;
         -timefmt)     timefmt="$2";     shift 2 ;;
-        -line-color)  line_color="$2";  shift 2 ;;
         -label-color) label_color="$2"; shift 2 ;;
         -time-color)  time_color="$2";  shift 2 ;;
         -axis-color)  axis_color="$2";  shift 2 ;;
         -min)         y_min="$2";       shift 2 ;;
         -max)         y_max="$2";       shift 2 ;;
+        -no-legend)   show_legend=0;    shift ;;
+        -s)
+            IFS=',' read -r name color filepath <<< "$2"
+            series_names+=("$name")
+            series_colors+=("$color")
+            series_files+=("$filepath")
+            shift 2
+            ;;
         *)            shift ;;
     esac
 done
+
+num_series=${#series_names[@]}
+if [[ $num_series -eq 0 ]]; then
+    echo "Error: No series specified. Use -s \"Name,color,file\" to add series." >&2
+    exit 1
+fi
 
 # Map color name to ANSI code
 _color_code() {
@@ -73,14 +92,24 @@ _color_code() {
         light-magenta) echo "95" ;;
         light-cyan)    echo "96" ;;
         "")            echo "" ;;
-        *)             echo "$1" ;;  # pass raw ANSI codes through
+        *)             echo "$1" ;;
     esac
 }
 
-line_ansi=$(_color_code "$line_color")
 label_ansi=$(_color_code "$label_color")
 time_ansi=$(_color_code "$time_color")
 axis_ansi=$(_color_code "$axis_color")
+
+# Build color list for awk (pipe-separated ANSI codes)
+color_list=""
+name_list=""
+for i in $(seq 0 $(( num_series - 1 ))); do
+    code=$(_color_code "${series_colors[$i]}")
+    [[ -n "$color_list" ]] && color_list+="|"
+    color_list+="$code"
+    [[ -n "$name_list" ]] && name_list+="|"
+    name_list+="${series_names[$i]}"
+done
 
 # Map timefmt to jq strftime format
 case "$timefmt" in
@@ -89,14 +118,27 @@ case "$timefmt" in
     *)        jq_fmt="%H:%M:%S" ;;
 esac
 
-input=$(cat)
+# Extract data from each series file, prefixed with series index
+combined_data=""
+for i in $(seq 0 $(( num_series - 1 ))); do
+    file="${series_files[$i]}"
+    if [[ ! -f "$file" ]]; then
+        echo "Error: File not found: $file" >&2
+        exit 1
+    fi
+    series_data=$(cat "$file" | jq -r --arg fmt "$jq_fmt" --arg idx "$i" \
+        '.[] | "\($idx) \(.time | localtime | strftime($fmt)) \(.value)"')
+    combined_data+="$series_data"$'\n'
+done
+
 this_dir=$(dirname "${BASH_SOURCE[0]}")
 
-# Extract time (formatted) and value, one per line as "timestr value"
-echo "$input" | jq -r --arg fmt "$jq_fmt" \
-    '.[] | "\(.time | localtime | strftime($fmt)) \(.value)"' | \
+# Feed combined data into gawk
+echo "$combined_data" | \
 gawk -v plot_height="$height" -v total_width="$width" \
-    -v c_line="$line_ansi" -v c_label="$label_ansi" \
-    -v c_time="$time_ansi" -v c_axis="$axis_ansi" \
+    -v c_label="$label_ansi" -v c_time="$time_ansi" -v c_axis="$axis_ansi" \
     -v forced_min="$y_min" -v forced_max="$y_max" \
-		-f "${this_dir}/awk/asciichart.awk"
+    -v num_series="$num_series" \
+    -v color_list="$color_list" -v name_list="$name_list" \
+    -v show_legend="$show_legend" \
+    -f "${this_dir}/awk/multiline-asciichart.awk"

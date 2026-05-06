@@ -46,20 +46,19 @@ echo -e "Executing ${_command_}moonraker $@${_none_}"
 sleep 1
 
 temp_terminal
-term_width=`tput cols`
-term_lines=`tput lines`
 
+needs_clear=0
+trap 'needs_clear=1' SIGWINCH
 
 export CACHE_MOONRAKER_CONNECT_STATUS=1
 while true; do
-	if [[ `tput cols` -ne ${term_width} || `tput lines` -ne ${term_lines} ]]; then
-		term_width=`tput cols`
-		term_lines=`tput lines`
+	if (( needs_clear )); then
 		tput clear
+		needs_clear=0
 	fi
 	tput cup 0 0
 	eval moonraker -c ${@@Q}
-	sleep 1;
+	read -t 1 -r _ </dev/null || true
 done
 
 #original_args=($@)

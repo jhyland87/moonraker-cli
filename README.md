@@ -1,4 +1,4 @@
->  ⚠️ This isn't something that's actively maintained. There are some bugs that I have not fixed, or features I have not added. 
+>  ⚠️ This isn't something that's actively maintained. There are some bugs that I have not fixed, or features I have not added.
 This was mostly only tested with my K1C printer, but should work for any printer running Klipper (with accessible Moonraker API).
 
 ----
@@ -9,7 +9,7 @@ $ git clone https://github.com/jhyland87/moonraker-cli.git
 $ ./moonraker-cli/install
 ```
 
-This should try to create a symlink to the `./moonraker-cli/moonraker` file at `/usr/local/bin/moonraker`. 
+This should try to create a symlink to the `./moonraker-cli/moonraker` file at `/usr/local/bin/moonraker`.
 
 # Usage
 `moonraker <subcommand> <arguments>`
@@ -41,7 +41,7 @@ To execute a command: _moonraker_ __command__ _[args]_
 Examples
 ```bash
 # Show high level help
-moonraker help 
+moonraker help
 
 # Show printer command help
 moonraker printer help
@@ -70,7 +70,7 @@ moonraker printer test
 ![File list](assets/images/moonraker_file_list.png)
 
 ### Printer temps
-![Temps](assets/images/moonraker_printer_temps.png)
+![Temps](./assets/images/demo-watch-temps.gif)
 
 ### Macros
 ![Macros](assets/images/moonraker_macros.png)

@@ -32,6 +32,10 @@ webcam.help() {
 	echo
 }
 
+if [[ -z $IMGCAT_BIN ]] || [[ ! -f $IMGCAT_BIN ]]; then
+	IMGCAT_BIN=$(which imgcat)
+fi
+
 [[ $# -eq 0 ]] && exit
 [[ $1 == 'description' ]] && eval ${__module_name}.description && exit
 [[ $1 == 'help' ]] && eval ${__module_name}.help && exit
@@ -39,15 +43,18 @@ webcam.help() {
 # View webcam snapshot
 # TODO: Check that imgcat is present and that were using iterm
 webcam.snapshot(){
+
+	local term_width=$(get_term_width)
+	local term_width_px=$(($term_width*15))
 	#curl "http://192.168.0.96:4408/webcam/"?action=snapshot
 
-	${IMGCAT_BIN} --width ${1:-60px} --url "http://${MOONRAKER_HOST}:${MJPG_STREAMER_PORT:-8080}/?action=snapshot"
+	${IMGCAT_BIN} --width ${1:-${term_width_px}px} --url "http://${MOONRAKER_HOST}:${MJPG_STREAMER_PORT:-8080}/?action=snapshot"
 
 	#curl "http://${MOONRAKER_HOST}:${MJPG_STREAMER_PORT:-8080}" \
 	#	  --request GET \
 	#	  --connect-timeout ${MOONRAKER_TIMEOUT:-5} \
 	#	  --silent \
-	#	  --data "action=snapshot" 
+	#	  --data "action=snapshot"
 
 	# http://192.168.0.96:8080/?action=stream
 }
@@ -55,13 +62,15 @@ webcam.snapshot(){
 # Stream webcam
 # TODO: Check that imgcat is present and that were using iterm
 webcam.stream(){
+	local term_width=$(get_term_width)
+	local term_width_px=$(($term_width*15))
 	#curl "http://192.168.0.96:4408/webcam/"?action=snapshot
 	echo "Starting webcam stream - ctrl+c to exit"
 	sleep 2
 	temp_terminal
 	while true; do
 		tput cup 0 0
-		${IMGCAT_BIN} --width ${1:-60px} --url "http://${MOONRAKER_HOST}:${MJPG_STREAMER_PORT:-8080}/?action=snapshot"
+		${IMGCAT_BIN} --width ${1:-${term_width_px}px} --url "http://${MOONRAKER_HOST}:${MJPG_STREAMER_PORT:-8080}/?action=snapshot"
 		echo "Last update: $(_toISOtime)"
 		sleep 1
 	done
@@ -70,7 +79,7 @@ webcam.stream(){
 	#	  --request GET \
 	#	  --connect-timeout ${MOONRAKER_TIMEOUT:-5} \
 	#	  --silent \
-	#	  --data "action=snapshot" 
+	#	  --data "action=snapshot"
 
 	# http://192.168.0.96:8080/?action=stream
 }
@@ -92,7 +101,7 @@ shift
 
 # Make sure the sumcommand is a defined function
 if [[ $(type -t "${subcmd_fn}") != 'function' ]]; then
-	_error "The command ${subcmd} is not a valid subcommand for ${__module_name}" 
+	_error "The command ${subcmd} is not a valid subcommand for ${__module_name}"
 	exit 2
 fi
 

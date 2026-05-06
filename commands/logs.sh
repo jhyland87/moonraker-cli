@@ -50,26 +50,40 @@ logs.help(){
 [[ $1 == 'help' ]] && eval ${__module_name}.help && exit
 
 
+
 logs.list(){
 	require_moonraker_api
 
-	_get /server/files/list root=logs | 
+	_get /server/files/list root=logs |
 		jq  --monochrome-output --raw-output \
     		-L './jq/' \
     		--from-file ./jq/filters/file.print__recently_modified.jq \
-    		--arg limit 5 | 
+    		--arg limit 5 |
     	jq --monochrome-output --raw-output \
 			-L './jq/' \
 			--from-file ./jq/modifiers/array_of_objects_to_csv.jq \
-			--arg output tsv | 
-		column -ts $'\t' | 
-		sed -e $'1s/^/\e[3m/' -e $'1s/$/\e[0m/'		
+			--arg output tsv |
+		column -ts $'\t' |
+		sed -e $'1s/^/\e[3m/' -e $'1s/$/\e[0m/'
 }
 
 logs.download(){
 	logfile=${1:-moonraker.log}
 	# /server/files/{root}/{filename}
 	_get /server/files/logs/${logfile}
+}
+
+logs.summarize() {
+	require_moonraker_api
+
+	echo "KLIPPY ERRORS/WARNINGS"
+	echo "-------------------------"
+	logs.download klippy.log | grep --color=always -E '^\[(ERROR|WARNING)\]'
+	echo
+	echo "MOONRAKER ERRORS/WARNINGS"
+	echo "-------------------------"
+	logs.download moonraker.log | grep --color=always -iE '(error|warn)'
+	echo
 }
 
 _debug "Arguments: $# - $*"
@@ -87,7 +101,7 @@ shift
 
 # Make sure the sumcommand is a defined function
 if [[ $(type -t "${subcmd_fn}") != 'function' ]]; then
-	_error "The command ${subcmd} is not a valid subcommand for ${__module_name}" 
+	_error "The command ${subcmd} is not a valid subcommand for ${__module_name}"
 	exit 2
 fi
 

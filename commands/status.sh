@@ -181,7 +181,8 @@ status.hotbed(){
 		)
 	else
 		graph_data=$(
-			curl --silent "${MOONRAKER_API_BASE}/server/temperature_store" | \
+			# curl --silent "http://192.168.0.96:7125/server/temperature_store" |
+			curl --silent "${MOONRAKER_API_BASE}/server/temperature_store" |
 				jq --monochrome-output \
 					--from-file ${__moonraker_base_dir}/jq/filters/server.temperature_store__component__datapoint.jq \
 					--arg limit ${graph_limit:-75} \
@@ -456,19 +457,105 @@ status.chamberfanspeed(){
 status.temps(){
 	require_moonraker_api
 
-	term_cols=$((`tput cols`-5))
-	term_lines=$((`tput lines`/5-3))
+	local term_cols=$((`tput cols`-5))
+	# Header (3 rows) + table (8 rows incl. blank) leaves the rest for the chart
+	local term_lines=$((`tput lines`-12))
+	[[ ${term_lines} -lt 10 ]] && term_lines=10
 
-	curl --silent "${MOONRAKER_API_BASE}/server/temperature_store" | jq > "${TMP_DIR}/temperature_store.json"
-	status.extruder $term_cols $term_lines "${TMP_DIR}/temperature_store.json"
-	_hr
-	status.hotbed $term_cols $term_lines "${TMP_DIR}/temperature_store.json"
-	_hr
-	status.mcutemp $term_cols $term_lines "${TMP_DIR}/temperature_store.json"
-	_hr
-	status.chambertemp $term_cols $term_lines "${TMP_DIR}/temperature_store.json"
-	_hr
-	status.chamberfan $term_cols $term_lines #"${TMP_DIR}/temperature_store.json"
+	local data_file="${TMP_DIR}/temperature_store.json"
+	curl --silent "${MOONRAKER_API_BASE}/server/temperature_store" | jq > "${data_file}"
+
+	# api_key | display | rgb_color | rgb_dim | power_field
+	# power_field: "powers" (heaters), "speeds" (fans), or "" (pure sensors)
+	local sensors=(
+		"extruder|Extruder|38;2;255;82;82|38;2;128;41;41|powers"
+		"heater_bed|Heater Bed|38;2;32;176;255|38;2;16;88;128|powers"
+		"temperature_fan chamber_fan|Chamber Fan|38;2;60;194;90|38;2;30;97;45|speeds"
+		"temperature_sensor chamber_temp|Chamber Temp|38;2;131;14;227|38;2;65;7;113|"
+		"temperature_sensor mcu_temp|MCU Temp|38;2;214;118;0|38;2;107;59;0|"
+	)
+
+	# Header row + divider
+	printf "  %b%-14s  %6s  %11s  %9s  %7s%b\n" "\e[1;4m" "Name" "Power" "Change" "Actual" "Target" "\e[0m"
+
+	local tmpdir
+	tmpdir=$(mktemp -d)
+	local chart_args=(
+		-height "$term_lines" -width "$term_cols" -timefmt MM:SS -no-legend
+		-label-color cyan -time-color magenta -axis-color light-gray
+	)
+
+	local sensor_def api_key display color dim_color power_field
+	local stats cur prev pwr tgt
+	local change_str actual_str target_str power_str
+	# Stash per-sensor chart-series specs in declaration order; appended to
+	# chart_args in reverse after the loop so earlier table rows draw on top.
+	local -a tgt_specs=() temp_specs=()
+	for sensor_def in "${sensors[@]}"; do
+		IFS='|' read -r api_key display color dim_color power_field <<< "$sensor_def"
+
+		stats=$(jq -r --arg c "$api_key" --arg pf "$power_field" '
+			.result[$c] as $r
+			| (($r.temperatures // [])[-1]) as $cur
+			| (($r.temperatures // [])[-2]) as $prev
+			| (if $pf != "" then (($r[$pf] // [])[-1]) else null end) as $pwr
+			| (($r.targets // [])[-1]) as $tgt
+			| "\($cur // "")|\($prev // "")|\($pwr // "")|\($tgt // "")"
+		' "$data_file")
+		IFS='|' read -r cur prev pwr tgt <<< "$stats"
+
+		[[ -n "$cur" ]] && actual_str=$(printf "%.1f °C" "$cur") || actual_str=""
+		if [[ -n "$cur" && -n "$prev" ]]; then
+			change_str=$(awk -v a="$cur" -v b="$prev" 'BEGIN{printf "%+.1f °C/s", a - b}')
+		else
+			change_str=""
+		fi
+		[[ -n "$tgt" ]] && target_str=$(printf "%.0f °C" "$tgt") || target_str=""
+		[[ -n "$pwr" ]] && power_str=$(awk -v p="$pwr" 'BEGIN{printf "%.0f%%", p * 100}') || power_str=""
+
+		printf "  \e[%sm%-14s\e[0m  %6s  %11s  %9s  %7s\n" \
+			"$color" "$display" "$power_str" "$change_str" "$actual_str" "$target_str"
+
+		# Skip series files for sensors with no data
+		[[ -z "$cur" ]] && tgt_specs+=("") && temp_specs+=("") && continue
+
+		local key_safe="${api_key// /_}"
+
+		if [[ -n "$tgt" ]]; then
+			local target_file="${tmpdir}/${key_safe}_target.json"
+			jq --monochrome-output \
+				--from-file "${__moonraker_base_dir}/jq/filters/server.temperature_store__component__datapoint.jq" \
+				--arg limit "${graph_limit:-500}" \
+				--arg component "$api_key" \
+				--arg datapoint targets \
+				"$data_file" > "$target_file"
+			tgt_specs+=("${display} tgt,${dim_color},${target_file}")
+		else
+			tgt_specs+=("")
+		fi
+
+		local temp_file="${tmpdir}/${key_safe}_temp.json"
+		jq --monochrome-output \
+			--from-file "${__moonraker_base_dir}/jq/filters/server.temperature_store__component__datapoint.jq" \
+			--arg limit "${graph_limit:-500}" \
+			--arg component "$api_key" \
+			--arg datapoint temperatures \
+			"$data_file" > "$temp_file"
+		temp_specs+=("${display},${color},${temp_file}")
+	done
+
+	# Append series in reverse so the first table row paints last (on top).
+	# Per-sensor: target before temp so the bright line stays above its dim target.
+	local i
+	for ((i=${#temp_specs[@]}-1; i>=0; i--)); do
+		[[ -n "${tgt_specs[i]}" ]]  && chart_args+=(-s "${tgt_specs[i]}")
+		[[ -n "${temp_specs[i]}" ]] && chart_args+=(-s "${temp_specs[i]}")
+	done
+
+	echo
+	bash "${CLI_DIR}/includes/multiline-chart.sh" "${chart_args[@]}"
+
+	rm -rf "$tmpdir"
 }
 
 status.wakeup(){
