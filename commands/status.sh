@@ -580,6 +580,23 @@ status.show(){
 	require_moonraker_api
 
 	echo "Checking status"
+	local print_stats__display_stats="/tmp/print_stats__display_stats.json"
+	local printing_file="/tmp/printing_file.json"
+	_get /printer/objects/query 'print_stats&display_status&virtual_sdcard' | jq '.result' > $print_stats__display_stats
+
+	local stl_filename=$(jq -r '.status.print_stats.filename' $print_stats__display_stats)
+
+	_get /server/files/metadata "filename=${stl_filename}" | jq '.result' > $printing_file
+
+	jq '{layer_count, layer_height, filament_name, filename}' $printing_file
+	cat $printing_file
+	echo
+	jq '.status | {display_status.progress, display_status.message}' $print_stats__display_stats
+
+	#http://192.168.0.96:4408/server/files/metadata?filename=3dbenchy_PA_29m50s.gcode
+
+
+	# http://192.168.0.96:4408/printer/objects/query?print_stats
 }
 
 _debug "Arguments: $# - $*"

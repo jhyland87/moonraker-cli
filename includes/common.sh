@@ -246,6 +246,28 @@ temp_terminal(){
 
 }
 
+set_title (){
+	printf "\033]0;${1?No title provided}\a"
+}
+
+set_progress (){
+	percent=${1:-0}
+
+	if [[ $percent -ge 100 ]]; then
+		echo -ne "\e]9;4;3\a"
+	else
+		echo -ne "\e]9;4;1;${percent}\a"
+	fi
+}
+
+set_progress_error (){
+	echo -ne "\e]9;4;2;${1:-0}\a"
+}
+
+hide_progress(){
+	printf "\e]9;4;0\a"
+}
+
 get_term_width() {
 	tput cols
 }
@@ -503,4 +525,10 @@ function loader {
   done
 
   loader_animation $pid "${loading_text}" $timeout_sec $show_duration $hide_on_success $post_pause_sec
+}
+
+# URL encode a given string
+function urlencode {
+    decodedString=$*;
+    echo -en "${decodedString}" | jq -sRr @uri
 }

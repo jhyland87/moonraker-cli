@@ -11,6 +11,8 @@ __module_dir=$(dirname "${__module_path}") # /absolute/path/to/module
 __module_file=$(basename ${__module_path}) # webcam.sh
 __module_name=${__module_file%%.sh} # example
 __moonraker_base_dir=$(realpath "${__module_dir}/../")
+
+__webcam_img_path="/tmp/webcam-snapshot.jpeg"
 # echo ${__module_name^^} # EXAMPLE
 
 webcam.description(){
@@ -57,6 +59,28 @@ webcam.snapshot(){
 	#	  --data "action=snapshot"
 
 	# http://192.168.0.96:8080/?action=stream
+}
+
+webcam.clearbg(){
+	[[ -f ${__webcam_img_path} ]] && rm -f ${__webcam_img_path}
+	printf "\033]1337;SetBackgroundImageFile=\a"
+}
+
+webcam.setbg(){
+	[[ -f ${__webcam_img_path} ]] && rm -f ${__webcam_img_path}
+	curl -s "http://${MOONRAKER_HOST}:${MJPG_STREAMER_PORT:-8080}/?action=snapshot" -o "${__webcam_img_path}"
+
+	local encoded_path=$(echo -n "${__webcam_img_path}" | base64)
+	#printf "\033]1337;SetBackgroundImageFile=\a"
+	printf "\033]1337;SetBackgroundImageFile=$encoded_path\a"
+}
+
+webcam.updatebg(){
+	IMG_PATH="/tmp/webcam-snapshot.jpeg"
+	[[ -f $IMG_PATH ]] && rm -f $IMG_PATH
+	curl -s "http://${MOONRAKER_HOST}:${MJPG_STREAMER_PORT:-8080}/?action=snapshot" -o "${IMG_PATH}"
+	#osascript -e "tell application \"iTerm2\" to tell current session of current window to set background image to \"$IMG_PATH\""
+
 }
 
 # Stream webcam
