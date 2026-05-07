@@ -454,6 +454,76 @@ status.chamberfanspeed(){
 	fi
 }
 
+# Format an integer number of seconds as "Hh Mm", "Mm Ss", or "Ss".
+_fmt_duration(){
+	local secs=${1%.*}
+	[[ -z "$secs" || "$secs" == "0" || "$secs" == "null" ]] && echo "—" && return
+	local h=$((secs / 3600)) m=$(((secs % 3600) / 60)) s=$((secs % 60))
+	if   (( h > 0 )); then printf "%dh %dm" "$h" "$m"
+	elif (( m > 0 )); then printf "%dm %ds" "$m" "$s"
+	else                   printf "%ds" "$s"
+	fi
+}
+
+# Build the print-status panel for `status temps`. Emits plain (uncolored) lines
+# on stdout — the caller is responsible for placement. Width: PANEL_WIDTH chars.
+_status_temps_panel_lines(){
+	local PANEL_WIDTH=32
+	local objs meta state filename progress total_dur cur_layer tot_layer est_time
+
+	objs=$(_get "/printer/objects/query?display_status&print_stats&virtual_sdcard" 2>/dev/null)
+	if [[ -z "$objs" ]]; then
+		printf "%-${PANEL_WIDTH}s\n" "── Print Status ──"
+		printf "%-${PANEL_WIDTH}s\n" "(unavailable)"
+		return
+	fi
+
+	state=$(jq -r '.result.status.print_stats.state // "unknown"' <<< "$objs")
+	filename=$(jq -r '.result.status.print_stats.filename // ""' <<< "$objs")
+	progress=$(jq -r '.result.status.virtual_sdcard.progress // 0' <<< "$objs")
+	total_dur=$(jq -r '.result.status.print_stats.total_duration // 0' <<< "$objs")
+	cur_layer=$(jq -r '.result.status.print_stats.info.current_layer // ""' <<< "$objs")
+	tot_layer=$(jq -r '.result.status.print_stats.info.total_layer // ""' <<< "$objs")
+
+	if [[ -n "$filename" && "$filename" != "null" ]]; then
+		local enc; enc=$(jq -nr --arg s "$filename" '$s|@uri')
+		meta=$(_get "/server/files/metadata?filename=${enc}" 2>/dev/null)
+		est_time=$(jq -r '.result.estimated_time // 0' <<< "$meta")
+	fi
+
+	local short_name="${filename##*/}"
+	[[ ${#short_name} -gt 21 ]] && short_name="${short_name:0:18}..."
+
+	local row_fmt="%-9s %-21s"  # 9 + 1 + 21 = 31, +1 trailing space = 32
+
+	# Header
+	printf "%-${PANEL_WIDTH}s\n" "── Print Status ──"
+
+	if [[ "$state" == "standby" || "$state" == "unknown" ]]; then
+		printf "$row_fmt \n" "State:" "Idle"
+		[[ -n "$short_name" ]] && printf "$row_fmt \n" "Last:" "$short_name"
+		return
+	fi
+
+	local pct elapsed eta_str
+	pct=$(awk -v p="$progress" 'BEGIN{printf "%.1f%%", p*100}')
+	elapsed=$(_fmt_duration "$total_dur")
+	if [[ -n "$est_time" && "$est_time" != "null" && "$est_time" != "0" ]]; then
+		local rem
+		rem=$(awk -v e="$est_time" -v d="$total_dur" 'BEGIN{r=e-d; printf "%d", (r>0?r:0)}')
+		eta_str=$(_fmt_duration "$rem")
+	fi
+
+	printf "$row_fmt \n" "File:"     "${short_name:-—}"
+	printf "$row_fmt \n" "State:"    "$state"
+	printf "$row_fmt \n" "Progress:" "$pct"
+	if [[ -n "$cur_layer" && "$cur_layer" != "null" ]]; then
+		printf "$row_fmt \n" "Layer:" "${cur_layer} / ${tot_layer}"
+	fi
+	printf "$row_fmt \n" "Elapsed:"  "$elapsed"
+	printf "$row_fmt \n" "ETA:"      "${eta_str:-—}"
+}
+
 status.temps(){
 	require_moonraker_api
 
@@ -475,15 +545,19 @@ status.temps(){
 		"temperature_sensor mcu_temp|MCU Temp|38;2;214;118;0|38;2;107;59;0|"
 	)
 
-	# Header row + divider
-	printf "  %b%-14s  %6s  %11s  %9s  %7s%b\n" "\e[1;4m" "Name" "Power" "Change" "Actual" "Target" "\e[0m"
-
 	local tmpdir
 	tmpdir=$(mktemp -d)
+
 	local chart_args=(
 		-height "$term_lines" -width "$term_cols" -timefmt MM:SS -no-legend
 		-label-color cyan -time-color magenta -axis-color light-gray
 	)
+
+	# Build the table rows up front so we can splice the print-status panel
+	# alongside them (one panel line per row, on the right).
+	local -a table_rows=()
+	table_rows+=("$(printf "  \e[1;4m%-14s  %6s  %11s  %9s  %7s\e[0m" \
+		"Name" "Power" "Change" "Actual" "Target")")
 
 	local sensor_def api_key display color dim_color power_field
 	local stats cur prev pwr tgt
@@ -513,8 +587,8 @@ status.temps(){
 		[[ -n "$tgt" ]] && target_str=$(printf "%.0f °C" "$tgt") || target_str=""
 		[[ -n "$pwr" ]] && power_str=$(awk -v p="$pwr" 'BEGIN{printf "%.0f%%", p * 100}') || power_str=""
 
-		printf "  \e[%sm%-14s\e[0m  %6s  %11s  %9s  %7s\n" \
-			"$color" "$display" "$power_str" "$change_str" "$actual_str" "$target_str"
+		table_rows+=("$(printf "  \e[%sm%-14s\e[0m  %6s  %11s  %9s  %7s" \
+			"$color" "$display" "$power_str" "$change_str" "$actual_str" "$target_str")")
 
 		# Skip series files for sensors with no data
 		[[ -z "$cur" ]] && tgt_specs+=("") && temp_specs+=("") && continue
@@ -550,6 +624,38 @@ status.temps(){
 	for ((i=${#temp_specs[@]}-1; i>=0; i--)); do
 		[[ -n "${tgt_specs[i]}" ]]  && chart_args+=(-s "${tgt_specs[i]}")
 		[[ -n "${temp_specs[i]}" ]] && chart_args+=(-s "${temp_specs[i]}")
+	done
+
+	# Print table rows with the print-status panel spliced on the right edge.
+	# `printf "%Ns"` measures byte length, which mis-aligns rows that contain a
+	# different number of multi-byte chars (every °C is 2 bytes / 1 visible col).
+	# So we pad to a fixed *visible* column based on bash's UTF-8-aware ${#var}.
+	local panel_width=32
+	local table_max_visible=57    # widest possible visible width of a table row
+	local -a panel_lines=()
+	if (( term_cols >= table_max_visible + 4 + panel_width )); then
+		readarray -t panel_lines < <(_status_temps_panel_lines)
+	fi
+
+	local n_rows=${#table_rows[@]}
+	(( ${#panel_lines[@]} > n_rows )) && n_rows=${#panel_lines[@]}
+
+	local r trow prow plain visible pad
+	for ((r=0; r<n_rows; r++)); do
+		trow="${table_rows[r]:-}"
+		prow="${panel_lines[r]:-}"
+
+		if [[ -n "$trow" ]]; then
+			plain=$(printf "%s" "$trow" | sed -E $'s/\E\\[[0-9;]*m//g')
+			visible=${#plain}                      # bash counts UTF-8 chars
+			pad=$(( term_cols - panel_width - visible ))
+			(( pad < 1 )) && pad=1
+			printf "%s%${pad}s" "$trow" ""
+		else
+			printf "%$((term_cols - panel_width))s" ""
+		fi
+		[[ -n "$prow" ]] && printf "\e[2;37m%s\e[0m" "$prow"
+		printf "\n"
 	done
 
 	echo
